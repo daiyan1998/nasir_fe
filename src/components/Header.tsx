@@ -77,10 +77,10 @@ const Header = () => {
       <nav className="border-t border-gray-700">
         <div className="container mx-auto px-4">
           <div className="flex items-center space-x-8 py-3">
-            <a href="#" className="text-white hover:text-brand-orange transition-colors font-medium">Home</a>
+            <a href="/" className="text-white hover:text-brand-orange transition-colors font-medium">Home</a>
             <a href="#" className="text-white hover:text-brand-orange transition-colors">Smartphones</a>
             <a href="#" className="text-white hover:text-brand-orange transition-colors">Laptops</a>
-            <a href="#" className="text-white hover:text-brand-orange transition-colors">Tablets</a>
+            <a href="/shop" className="text-white hover:text-brand-orange transition-colors">Tablets</a>
             <a href="#" className="text-white hover:text-brand-orange transition-colors">Accessories</a>
             <a href="#" className="text-white hover:text-brand-orange transition-colors">Smart Home</a>
             <a href="#" className="text-white hover:text-brand-orange transition-colors">Gaming</a>
