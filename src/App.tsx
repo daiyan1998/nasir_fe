@@ -10,6 +10,7 @@ import Product from "./pages/Product";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
+import Products from "./pages/admin/Products";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +27,7 @@ const App = () => (
             <Route path="/product/:id" element={<Product />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
-              <Route path="products" element={<div>Products</div>} />
+              <Route path="products" element={<Products />} />
               <Route path="categories" element={<div>Categories</div>} />
               <Route path="orders" element={<div>Orders</div>} />
               <Route path="users" element={<div>Users</div>} />
