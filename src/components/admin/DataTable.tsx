@@ -77,7 +77,7 @@ export function DataTable<T extends { id: string }>({
 
     // Active filters
     for (const [key, value] of Object.entries(activeFilters)) {
-      if (value && String(item[key as keyof T]) !== value) {
+      if (value && value !== "all" && String(item[key as keyof T]) !== value) {
         return false
       }
     }
@@ -141,7 +141,7 @@ export function DataTable<T extends { id: string }>({
                   <SelectValue placeholder={filter.label} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All {filter.label}</SelectItem>
+                  <SelectItem value="all">All {filter.label}</SelectItem>
                   {filter.options.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
