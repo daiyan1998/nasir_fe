@@ -483,12 +483,19 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
                             <div key={category.id}>
                               {category.children ? (
                                 category.children.map((child) => (
-                                  <SelectItem key={child.id} value={child.id}>
+                                  <SelectItem 
+                                    key={child.id} 
+                                    value={child.id}
+                                    onClick={() => handleCategoryChange(`${category.name} / ${child.name}`, child.id)}
+                                  >
                                     {category.name} / {child.name}
                                   </SelectItem>
                                 ))
                               ) : (
-                                <SelectItem value={category.id}>
+                                <SelectItem 
+                                  value={category.id}
+                                  onClick={() => handleCategoryChange(category.name, category.id)}
+                                >
                                   {category.name}
                                 </SelectItem>
                               )}

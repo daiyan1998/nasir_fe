@@ -28,7 +28,8 @@ const App = () => (
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
-              <Route path="categories" element={<div>Categories</div>} />
+              <Route path="categories" element={<Categories />} />
+              <Route path="attributes" element={<Attributes />} />
               <Route path="orders" element={<div>Orders</div>} />
               <Route path="users" element={<div>Users</div>} />
               <Route path="reviews" element={<div>Reviews</div>} />

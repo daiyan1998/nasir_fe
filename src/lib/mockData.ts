@@ -16,6 +16,7 @@ export interface Product {
   primaryImage: string
   metaTitle: string
   metaDescription: string
+  attributes: Record<string, any>
   createdAt: string
 }
 
@@ -23,40 +24,72 @@ export interface Category {
   id: string
   name: string
   slug: string
+  description?: string
   parentId?: string
+  image?: string
+  active: boolean
+  order: number
   children?: Category[]
+}
+
+export interface Attribute {
+  id: string
+  name: string
+  slug: string
+  type: 'text' | 'number' | 'select' | 'boolean'
+  unit?: string
+  isFilterable: boolean
+  values?: AttributeValue[]
+  createdAt: string
+}
+
+export interface AttributeValue {
+  id: string
+  value: string
+  order: number
+}
+
+export interface CategoryAttribute {
+  categoryId: string
+  attributeId: string
+  required: boolean
+  order: number
 }
 
 export const categories: Category[] = [
   {
-    id: '1',
+    id: 'electronics',
     name: 'Electronics',
     slug: 'electronics',
+    description: 'Electronic devices and gadgets',
+    active: true,
+    order: 1,
     children: [
-      { id: '2', name: 'Smartphones', slug: 'smartphones', parentId: '1' },
-      { id: '3', name: 'Laptops', slug: 'laptops', parentId: '1' },
-      { id: '4', name: 'Audio', slug: 'audio', parentId: '1' },
-      { id: '5', name: 'Wearables', slug: 'wearables', parentId: '1' }
-    ]
-  },
-  {
-    id: '6',
-    name: 'Home & Garden',
-    slug: 'home-garden',
-    children: [
-      { id: '7', name: 'Furniture', slug: 'furniture', parentId: '6' },
-      { id: '8', name: 'Decor', slug: 'decor', parentId: '6' }
-    ]
-  },
-  {
-    id: '9',
-    name: 'Fashion',
-    slug: 'fashion',
-    children: [
-      { id: '10', name: 'Men\'s Clothing', slug: 'mens-clothing', parentId: '9' },
-      { id: '11', name: 'Women\'s Clothing', slug: 'womens-clothing', parentId: '9' }
+      { id: 'smartphones', name: 'Smartphones', slug: 'smartphones', parentId: 'electronics', active: true, order: 1 },
+      { id: 'laptops', name: 'Laptops', slug: 'laptops', parentId: 'electronics', active: true, order: 2 },
+      { id: 'headphones', name: 'Headphones', slug: 'headphones', parentId: 'electronics', active: true, order: 3 },
+      { id: 'smartwatches', name: 'Smart Watches', slug: 'smartwatches', parentId: 'electronics', active: true, order: 4 }
     ]
   }
+]
+
+export const attributes: Attribute[] = [
+  {
+    id: 'brand',
+    name: 'Brand',
+    slug: 'brand',
+    type: 'select',
+    isFilterable: true,
+    values: [
+      { id: 'apple', value: 'Apple', order: 1 },
+      { id: 'samsung', value: 'Samsung', order: 2 }
+    ],
+    createdAt: '2024-01-01'
+  }
+]
+
+export const categoryAttributes: CategoryAttribute[] = [
+  { categoryId: 'smartphones', attributeId: 'brand', required: true, order: 1 }
 ]
 
 export const products: Product[] = [
@@ -78,6 +111,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/iphone-16-hero.jpg',
     metaTitle: 'iPhone 16 Pro Max - Latest Apple Smartphone',
     metaDescription: 'Get the latest iPhone 16 Pro Max with advanced features and improved performance.',
+    attributes: { brand: 'apple' },
     createdAt: '2024-01-15'
   },
   {
@@ -97,6 +131,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/gaming-laptop.jpg',
     metaTitle: 'MacBook Pro 14" - Professional Laptop',
     metaDescription: 'Powerful MacBook Pro with M3 chip for professionals and creatives.',
+    attributes: {},
     createdAt: '2024-01-14'
   },
   {
