@@ -44,6 +44,7 @@ interface DataTableProps<T> {
   }[]
   onEdit?: (item: T) => void
   onDelete?: (item: T) => void
+  customActions?: (item: T) => React.ReactNode
   onBulkDelete?: (items: T[]) => void
   onBulkAction?: (action: string, items: T[]) => void
   itemsPerPage?: number
@@ -56,6 +57,7 @@ export function DataTable<T extends { id: string }>({
   filters,
   onEdit,
   onDelete,
+  customActions,
   onBulkDelete,
   onBulkAction,
   itemsPerPage = 10
@@ -220,28 +222,32 @@ export function DataTable<T extends { id: string }>({
                 {columns.map((column) => (
                   <TableCell key={String(column.key)}>
                     {column.key === 'actions' ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {onEdit && (
-                            <DropdownMenuItem onClick={() => onEdit(item)}>
-                              Edit
-                            </DropdownMenuItem>
-                          )}
-                          {onDelete && (
-                            <DropdownMenuItem 
-                              onClick={() => onDelete(item)}
-                              className="text-destructive"
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      customActions ? (
+                        customActions(item)
+                      ) : (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {onEdit && (
+                              <DropdownMenuItem onClick={() => onEdit(item)}>
+                                Edit
+                              </DropdownMenuItem>
+                            )}
+                            {onDelete && (
+                              <DropdownMenuItem 
+                                onClick={() => onDelete(item)}
+                                className="text-destructive"
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )
                     ) : column.render ? (
                       column.render(item)
                     ) : (

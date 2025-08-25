@@ -299,6 +299,248 @@ export const products: Product[] = [
   }
 ]
 
+export interface User {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  avatar?: string
+  role: 'admin' | 'customer'
+  status: 'active' | 'inactive'
+  registrationDate: string
+  lastLogin?: string
+  totalOrders: number
+  totalSpent: number
+  addresses: UserAddress[]
+}
+
+export interface UserAddress {
+  id: string
+  type: 'billing' | 'shipping'
+  isDefault: boolean
+  street: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+}
+
+export interface Review {
+  id: string
+  productId: string
+  productName: string
+  customerId: string
+  customerName: string
+  customerAvatar?: string
+  rating: number
+  title: string
+  comment: string
+  status: 'pending' | 'approved' | 'rejected'
+  isVerifiedPurchase: boolean
+  reviewDate: string
+  helpful: number
+}
+
+export interface Banner {
+  id: string
+  title: string
+  subtitle?: string
+  description?: string
+  image: string
+  linkUrl?: string
+  buttonText?: string
+  position: 'hero' | 'category-top' | 'category-side' | 'footer'
+  categoryId?: string
+  startDate?: string
+  endDate?: string
+  active: boolean
+  order: number
+  createdAt: string
+}
+
+export const users: User[] = [
+  {
+    id: '1',
+    name: 'John Smith',
+    email: 'john.smith@email.com',
+    phone: '+1 (555) 123-4567',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    role: 'customer',
+    status: 'active',
+    registrationDate: '2024-01-15',
+    lastLogin: '2024-01-25',
+    totalOrders: 3,
+    totalSpent: 2847.84,
+    addresses: [
+      {
+        id: '1',
+        type: 'shipping',
+        isDefault: true,
+        street: '123 Main St, Apt 4B',
+        city: 'New York',
+        state: 'NY',
+        zipCode: '10001',
+        country: 'United States'
+      }
+    ]
+  },
+  {
+    id: '2',
+    name: 'Sarah Johnson',
+    email: 'sarah.j@email.com',
+    phone: '+1 (555) 987-6543',
+    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b829?w=150',
+    role: 'customer',
+    status: 'active',
+    registrationDate: '2024-01-10',
+    lastLogin: '2024-01-24',
+    totalOrders: 5,
+    totalSpent: 4234.67,
+    addresses: [
+      {
+        id: '2',
+        type: 'shipping',
+        isDefault: true,
+        street: '456 Oak Avenue',
+        city: 'Los Angeles',
+        state: 'CA',
+        zipCode: '90210',
+        country: 'United States'
+      }
+    ]
+  },
+  {
+    id: '3',
+    name: 'Admin User',
+    email: 'admin@store.com',
+    role: 'admin',
+    status: 'active',
+    registrationDate: '2023-12-01',
+    lastLogin: '2024-01-25',
+    totalOrders: 0,
+    totalSpent: 0,
+    addresses: []
+  },
+  {
+    id: '4',
+    name: 'Michael Brown',
+    email: 'mike.brown@email.com',
+    phone: '+1 (555) 456-7890',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    role: 'customer',
+    status: 'inactive',
+    registrationDate: '2024-01-08',
+    lastLogin: '2024-01-20',
+    totalOrders: 1,
+    totalSpent: 365.32,
+    addresses: []
+  }
+]
+
+export const reviews: Review[] = [
+  {
+    id: '1',
+    productId: '1',
+    productName: 'iPhone 16 Pro Max',
+    customerId: '1',
+    customerName: 'John Smith',
+    customerAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    rating: 5,
+    title: 'Amazing phone!',
+    comment: 'The camera quality is incredible and the battery life is outstanding. Definitely worth the upgrade from my previous iPhone.',
+    status: 'approved',
+    isVerifiedPurchase: true,
+    reviewDate: '2024-01-22',
+    helpful: 12
+  },
+  {
+    id: '2',
+    productId: '2',
+    productName: 'MacBook Pro 14"',
+    customerId: '2',
+    customerName: 'Sarah Johnson',
+    customerAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b829?w=150',
+    rating: 4,
+    title: 'Great laptop for work',
+    comment: 'Perfect for my design work. The M3 chip handles everything I throw at it. Only wish it had more ports.',
+    status: 'approved',
+    isVerifiedPurchase: true,
+    reviewDate: '2024-01-23',
+    helpful: 8
+  },
+  {
+    id: '3',
+    productId: '3',
+    productName: 'AirPods Pro 3rd Gen',
+    customerId: '4',
+    customerName: 'Michael Brown',
+    rating: 3,
+    title: 'Good but not great',
+    comment: 'The noise cancellation is decent but I expected better for the price. Sound quality is good though.',
+    status: 'pending',
+    isVerifiedPurchase: true,
+    reviewDate: '2024-01-24',
+    helpful: 2
+  },
+  {
+    id: '4',
+    productId: '1',
+    productName: 'iPhone 16 Pro Max',
+    customerId: '2',
+    customerName: 'Sarah Johnson',
+    customerAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b829?w=150',
+    rating: 1,
+    title: 'Disappointed',
+    comment: 'Battery died after 6 months. Very poor quality for the price.',
+    status: 'rejected',
+    isVerifiedPurchase: false,
+    reviewDate: '2024-01-25',
+    helpful: 0
+  }
+]
+
+export const banners: Banner[] = [
+  {
+    id: '1',
+    title: 'Summer Sale',
+    subtitle: 'Up to 50% Off',
+    description: 'Get amazing discounts on electronics and gadgets',
+    image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800',
+    linkUrl: '/shop',
+    buttonText: 'Shop Now',
+    position: 'hero',
+    active: true,
+    order: 1,
+    startDate: '2024-01-20',
+    endDate: '2024-02-20',
+    createdAt: '2024-01-18'
+  },
+  {
+    id: '2',
+    title: 'New Arrivals',
+    subtitle: 'Latest Tech',
+    description: 'Discover the newest gadgets and electronics',
+    image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800',
+    linkUrl: '/shop?category=new',
+    buttonText: 'Explore',
+    position: 'category-top',
+    categoryId: 'electronics',
+    active: true,
+    order: 2,
+    createdAt: '2024-01-19'
+  },
+  {
+    id: '3',
+    title: 'Free Shipping',
+    description: 'On orders over $100',
+    image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400',
+    position: 'category-side',
+    active: false,
+    order: 3,
+    createdAt: '2024-01-17'
+  }
+]
+
 export interface Order {
   id: string
   orderNumber: string
