@@ -137,10 +137,9 @@ export function CategoryForm({ category, categories, onSave, onCancel }: Categor
         <div className="space-y-2">
           <Label>Category Image</Label>
           <ImageUploader
-            value={formData.image ? [formData.image] : []}
-            onChange={(images) => setFormData(prev => ({ ...prev, image: images[0] || '' }))}
-            multiple={false}
-            maxFiles={1}
+            images={formData.image ? [{ id: '1', file: new File([''], 'placeholder'), preview: formData.image }] : []}
+            onImagesChange={(images) => setFormData(prev => ({ ...prev, image: images[0]?.preview || '' }))}
+            maxImages={1}
           />
         </div>
       </div>

@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
+import Categories from "./pages/admin/Categories";
+import Attributes from "./pages/admin/Attributes";
 
 const queryClient = new QueryClient();
 

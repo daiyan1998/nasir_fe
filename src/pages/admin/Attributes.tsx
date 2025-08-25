@@ -77,7 +77,7 @@ export default function Attributes() {
       )
     },
     {
-      key: 'usage',
+      key: 'createdAt',
       header: 'Usage',
       render: (attribute) => {
         const usageCount = categoryAttributes.filter(ca => ca.attributeId === attribute.id).length

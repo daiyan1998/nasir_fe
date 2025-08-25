@@ -27,7 +27,7 @@ export function CategoryAttributeAssignment({
 
   // Flatten categories for easier access
   const flatCategories = categories.flatMap(cat => 
-    cat.children ? cat.children.map(child => ({ ...child, parentName: cat.name })) : [cat]
+    cat.children ? cat.children.map(child => ({ ...child, parentName: cat.name })) : [{ ...cat, parentName: undefined }]
   )
 
   useEffect(() => {

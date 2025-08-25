@@ -152,6 +152,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/airpods-pro.jpg',
     metaTitle: 'AirPods Pro 3rd Generation - Premium Audio',
     metaDescription: 'Experience premium sound quality with AirPods Pro 3rd generation.',
+    attributes: {},
     createdAt: '2024-01-13'
   },
   {
@@ -171,6 +172,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/galaxy-watch.jpg',
     metaTitle: 'Galaxy Watch 6 - Advanced Smartwatch',
     metaDescription: 'Stay connected and healthy with the Galaxy Watch 6.',
+    attributes: {},
     createdAt: '2024-01-12'
   },
   {
@@ -190,6 +192,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/gaming-laptop.jpg',
     metaTitle: 'Dell XPS 13 - Ultra-portable Laptop',
     metaDescription: 'Lightweight and powerful Dell XPS 13 laptop.',
+    attributes: {},
     createdAt: '2024-01-11'
   },
   {
@@ -210,6 +213,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/airpods-pro.jpg',
     metaTitle: 'Sony WH-1000XM5 - Premium Headphones',
     metaDescription: 'Experience superior sound with Sony WH-1000XM5 headphones.',
+    attributes: {},
     createdAt: '2024-01-10'
   },
   {
@@ -229,6 +233,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/iphone-16-hero.jpg',
     metaTitle: 'iPad Air 5th Gen - Versatile Tablet',
     metaDescription: 'Powerful iPad Air with M1 chip for all your needs.',
+    attributes: {},
     createdAt: '2024-01-09'
   },
   {
@@ -248,6 +253,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/gaming-laptop.jpg',
     metaTitle: 'Gaming Chair Pro - Ergonomic Comfort',
     metaDescription: 'Comfortable gaming chair for long gaming sessions.',
+    attributes: {},
     createdAt: '2024-01-08'
   },
   {
@@ -268,6 +274,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/airpods-pro.jpg',
     metaTitle: 'Wireless Charging Pad - Fast Charging',
     metaDescription: 'Convenient wireless charging for your devices.',
+    attributes: {},
     createdAt: '2024-01-07'
   },
   {
@@ -287,6 +294,7 @@ export const products: Product[] = [
     primaryImage: '/src/assets/galaxy-watch.jpg',
     metaTitle: 'Smart Home Hub - Home Automation',
     metaDescription: 'Control all your smart devices from one hub.',
+    attributes: {},
     createdAt: '2024-01-06'
   }
 ]
