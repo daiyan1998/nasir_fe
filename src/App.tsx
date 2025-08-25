@@ -13,6 +13,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import Categories from "./pages/admin/Categories";
 import Attributes from "./pages/admin/Attributes";
+import Orders from "./pages/admin/Orders";
+import OrderDetails from "./pages/admin/OrderDetails";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +34,8 @@ const App = () => (
               <Route path="products" element={<Products />} />
               <Route path="categories" element={<Categories />} />
               <Route path="attributes" element={<Attributes />} />
-              <Route path="orders" element={<div>Orders</div>} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="orders/:id" element={<OrderDetails />} />
               <Route path="users" element={<div>Users</div>} />
               <Route path="reviews" element={<div>Reviews</div>} />
               <Route path="banners" element={<div>Banners</div>} />

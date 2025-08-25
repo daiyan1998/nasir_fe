@@ -299,6 +299,269 @@ export const products: Product[] = [
   }
 ]
 
+export interface Order {
+  id: string
+  orderNumber: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  orderDate: string
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
+  paymentMethod: string
+  transactionId: string
+  shippingAddress: {
+    street: string
+    city: string
+    state: string
+    zipCode: string
+    country: string
+  }
+  items: OrderItem[]
+  subtotal: number
+  shipping: number
+  tax: number
+  total: number
+  statusHistory: OrderStatusHistory[]
+  createdAt: string
+}
+
+export interface OrderItem {
+  id: string
+  productId: string
+  productName: string
+  productImage: string
+  quantity: number
+  price: number
+  subtotal: number
+}
+
+export interface OrderStatusHistory {
+  id: string
+  status: Order['status']
+  timestamp: string
+  notes?: string
+}
+
+export const orders: Order[] = [
+  {
+    id: '1',
+    orderNumber: 'ORD-2024-001',
+    customerName: 'John Smith',
+    customerEmail: 'john.smith@email.com',
+    customerPhone: '+1 (555) 123-4567',
+    orderDate: '2024-01-20',
+    status: 'delivered',
+    paymentStatus: 'paid',
+    paymentMethod: 'Credit Card',
+    transactionId: 'TXN-123456789',
+    shippingAddress: {
+      street: '123 Main St, Apt 4B',
+      city: 'New York',
+      state: 'NY',
+      zipCode: '10001',
+      country: 'United States'
+    },
+    items: [
+      {
+        id: '1',
+        productId: '1',
+        productName: 'iPhone 16 Pro Max',
+        productImage: '/src/assets/iphone-16-hero.jpg',
+        quantity: 1,
+        price: 1099,
+        subtotal: 1099
+      }
+    ],
+    subtotal: 1099,
+    shipping: 15,
+    tax: 87.92,
+    total: 1201.92,
+    statusHistory: [
+      { id: '1', status: 'pending', timestamp: '2024-01-20T10:00:00Z' },
+      { id: '2', status: 'confirmed', timestamp: '2024-01-20T14:30:00Z' },
+      { id: '3', status: 'shipped', timestamp: '2024-01-21T09:15:00Z' },
+      { id: '4', status: 'delivered', timestamp: '2024-01-23T16:45:00Z' }
+    ],
+    createdAt: '2024-01-20'
+  },
+  {
+    id: '2',
+    orderNumber: 'ORD-2024-002',
+    customerName: 'Sarah Johnson',
+    customerEmail: 'sarah.j@email.com',
+    customerPhone: '+1 (555) 987-6543',
+    orderDate: '2024-01-21',
+    status: 'shipped',
+    paymentStatus: 'paid',
+    paymentMethod: 'PayPal',
+    transactionId: 'PP-987654321',
+    shippingAddress: {
+      street: '456 Oak Avenue',
+      city: 'Los Angeles',
+      state: 'CA',
+      zipCode: '90210',
+      country: 'United States'
+    },
+    items: [
+      {
+        id: '2',
+        productId: '2',
+        productName: 'MacBook Pro 14"',
+        productImage: '/src/assets/gaming-laptop.jpg',
+        quantity: 1,
+        price: 1999,
+        subtotal: 1999
+      },
+      {
+        id: '3',
+        productId: '3',
+        productName: 'AirPods Pro 3rd Gen',
+        productImage: '/src/assets/airpods-pro.jpg',
+        quantity: 2,
+        price: 199,
+        subtotal: 398
+      }
+    ],
+    subtotal: 2397,
+    shipping: 25,
+    tax: 191.76,
+    total: 2613.76,
+    statusHistory: [
+      { id: '5', status: 'pending', timestamp: '2024-01-21T11:00:00Z' },
+      { id: '6', status: 'confirmed', timestamp: '2024-01-21T15:20:00Z' },
+      { id: '7', status: 'shipped', timestamp: '2024-01-22T08:30:00Z' }
+    ],
+    createdAt: '2024-01-21'
+  },
+  {
+    id: '3',
+    orderNumber: 'ORD-2024-003',
+    customerName: 'Michael Brown',
+    customerEmail: 'mike.brown@email.com',
+    customerPhone: '+1 (555) 456-7890',
+    orderDate: '2024-01-22',
+    status: 'confirmed',
+    paymentStatus: 'paid',
+    paymentMethod: 'Credit Card',
+    transactionId: 'TXN-456789123',
+    shippingAddress: {
+      street: '789 Pine Street',
+      city: 'Chicago',
+      state: 'IL',
+      zipCode: '60601',
+      country: 'United States'
+    },
+    items: [
+      {
+        id: '4',
+        productId: '4',
+        productName: 'Galaxy Watch 6',
+        productImage: '/src/assets/galaxy-watch.jpg',
+        quantity: 1,
+        price: 329,
+        subtotal: 329
+      }
+    ],
+    subtotal: 329,
+    shipping: 10,
+    tax: 26.32,
+    total: 365.32,
+    statusHistory: [
+      { id: '8', status: 'pending', timestamp: '2024-01-22T13:15:00Z' },
+      { id: '9', status: 'confirmed', timestamp: '2024-01-22T16:45:00Z' }
+    ],
+    createdAt: '2024-01-22'
+  },
+  {
+    id: '4',
+    orderNumber: 'ORD-2024-004',
+    customerName: 'Emily Davis',
+    customerEmail: 'emily.davis@email.com',
+    customerPhone: '+1 (555) 321-0987',
+    orderDate: '2024-01-23',
+    status: 'pending',
+    paymentStatus: 'pending',
+    paymentMethod: 'Credit Card',
+    transactionId: 'TXN-789123456',
+    shippingAddress: {
+      street: '321 Elm Drive',
+      city: 'Miami',
+      state: 'FL',
+      zipCode: '33101',
+      country: 'United States'
+    },
+    items: [
+      {
+        id: '5',
+        productId: '6',
+        productName: 'Sony WH-1000XM5',
+        productImage: '/src/assets/airpods-pro.jpg',
+        quantity: 1,
+        price: 349,
+        subtotal: 349
+      },
+      {
+        id: '6',
+        productId: '9',
+        productName: 'Wireless Charging Pad',
+        productImage: '/src/assets/airpods-pro.jpg',
+        quantity: 3,
+        price: 39,
+        subtotal: 117
+      }
+    ],
+    subtotal: 466,
+    shipping: 12,
+    tax: 37.28,
+    total: 515.28,
+    statusHistory: [
+      { id: '10', status: 'pending', timestamp: '2024-01-23T09:30:00Z' }
+    ],
+    createdAt: '2024-01-23'
+  },
+  {
+    id: '5',
+    orderNumber: 'ORD-2024-005',
+    customerName: 'David Wilson',
+    customerEmail: 'david.wilson@email.com',
+    customerPhone: '+1 (555) 654-3210',
+    orderDate: '2024-01-24',
+    status: 'cancelled',
+    paymentStatus: 'refunded',
+    paymentMethod: 'Credit Card',
+    transactionId: 'TXN-321654987',
+    shippingAddress: {
+      street: '654 Maple Lane',
+      city: 'Seattle',
+      state: 'WA',
+      zipCode: '98101',
+      country: 'United States'
+    },
+    items: [
+      {
+        id: '7',
+        productId: '7',
+        productName: 'iPad Air 5th Gen',
+        productImage: '/src/assets/iphone-16-hero.jpg',
+        quantity: 1,
+        price: 599,
+        subtotal: 599
+      }
+    ],
+    subtotal: 599,
+    shipping: 15,
+    tax: 47.92,
+    total: 661.92,
+    statusHistory: [
+      { id: '11', status: 'pending', timestamp: '2024-01-24T12:00:00Z' },
+      { id: '12', status: 'confirmed', timestamp: '2024-01-24T14:20:00Z' },
+      { id: '13', status: 'cancelled', timestamp: '2024-01-24T18:30:00Z', notes: 'Customer requested cancellation' }
+    ],
+    createdAt: '2024-01-24'
+  }
+]
+
 export const generateSKU = (): string => {
   const prefix = 'PRD'
   const timestamp = Date.now().toString().slice(-6)
