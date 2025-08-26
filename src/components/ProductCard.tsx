@@ -2,6 +2,7 @@ import { Heart, Star, ShoppingCart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AddToCartButton } from "./cart/AddToCartButton";
 
 interface ProductCardProps {
   image: string;
@@ -83,10 +84,13 @@ const ProductCard = ({
             )}
           </div>
 
-          <Button className="w-full bg-brand-orange hover:bg-brand-orange-light text-white opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Add to Cart
-          </Button>
+          <AddToCartButton
+            productId={title}
+            productName={title}
+            price={parseFloat(price.replace('$', ''))}
+            image={image}
+            className="w-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
+          />
         </div>
       </CardContent>
     </Card>

@@ -2,6 +2,7 @@ import { Search, ShoppingCart, User, Heart, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { CartDrawer } from "./cart/CartDrawer";
 
 const Header = () => {
   return (
@@ -62,13 +63,7 @@ const Header = () => {
               <Heart className="h-5 w-5" />
               <span className="ml-1 hidden md:inline">Wishlist</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-white hover:text-brand-orange hover:bg-transparent relative">
-              <ShoppingCart className="h-5 w-5" />
-              <Badge className="absolute -top-2 -right-2 bg-brand-orange text-white text-xs px-1.5 py-0.5">
-                3
-              </Badge>
-              <span className="ml-1 hidden md:inline">Cart</span>
-            </Button>
+            <CartDrawer />
           </div>
         </div>
       </div>
