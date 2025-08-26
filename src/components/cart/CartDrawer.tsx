@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -21,6 +22,7 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerProps) {
+  const navigate = useNavigate()
   const [cartItems, setCartItems] = useState<CartItem[]>(items)
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -45,6 +47,10 @@ export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerP
   }
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+
+  const handleCheckout = () => {
+    navigate('/checkout')
+  }
 
   return (
     <Sheet>
@@ -146,7 +152,11 @@ export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerP
                   <span>${calculateTotal().toFixed(2)}</span>
                 </div>
                 <div className="space-y-2">
-                  <Button className="w-full" size="lg">
+                  <Button 
+                    className="w-full bg-brand-orange hover:bg-brand-orange/90" 
+                    size="lg"
+                    onClick={handleCheckout}
+                  >
                     Checkout
                   </Button>
                   <Button variant="outline" className="w-full">
