@@ -3,6 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CartDrawer } from "./cart/CartDrawer";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+} from "@/components/ui/menubar";
 
 const Header = () => {
   return (
@@ -70,17 +78,116 @@ const Header = () => {
 
       {/* Navigation */}
       <nav className="border-t border-gray-700">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center space-x-8 py-3">
-            <a href="/" className="text-white hover:text-brand-orange transition-colors font-medium">Home</a>
-            <a href="#" className="text-white hover:text-brand-orange transition-colors">Smartphones</a>
-            <a href="#" className="text-white hover:text-brand-orange transition-colors">Laptops</a>
-            <a href="/shop" className="text-white hover:text-brand-orange transition-colors">Tablets</a>
-            <a href="#" className="text-white hover:text-brand-orange transition-colors">Accessories</a>
-            <a href="#" className="text-white hover:text-brand-orange transition-colors">Smart Home</a>
-            <a href="#" className="text-white hover:text-brand-orange transition-colors">Gaming</a>
-            <a href="#" className="text-white hover:text-brand-orange transition-colors">Deals</a>
-          </div>
+        <div className="container mx-auto px-4 py-2">
+          <Menubar className="bg-transparent border-0 h-auto p-0">
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange font-medium bg-transparent">
+                Home
+              </MenubarTrigger>
+            </MenubarMenu>
+            
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
+                Smartphones
+              </MenubarTrigger>
+              <MenubarContent className="bg-popover border-border">
+                <MenubarItem>iPhone</MenubarItem>
+                <MenubarItem>Samsung Galaxy</MenubarItem>
+                <MenubarItem>Google Pixel</MenubarItem>
+                <MenubarItem>OnePlus</MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem>Cases & Protection</MenubarItem>
+                <MenubarItem>Screen Protectors</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
+                Laptops
+              </MenubarTrigger>
+              <MenubarContent className="bg-popover border-border">
+                <MenubarItem>MacBook</MenubarItem>
+                <MenubarItem>Gaming Laptops</MenubarItem>
+                <MenubarItem>Business Laptops</MenubarItem>
+                <MenubarItem>Ultrabooks</MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem>Laptop Bags</MenubarItem>
+                <MenubarItem>Cooling Pads</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
+                Tablets
+              </MenubarTrigger>
+              <MenubarContent className="bg-popover border-border">
+                <MenubarItem>iPad</MenubarItem>
+                <MenubarItem>Samsung Galaxy Tab</MenubarItem>
+                <MenubarItem>Surface Tablets</MenubarItem>
+                <MenubarItem>Android Tablets</MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem>Tablet Cases</MenubarItem>
+                <MenubarItem>Stylus & Pens</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
+                Accessories
+              </MenubarTrigger>
+              <MenubarContent className="bg-popover border-border">
+                <MenubarItem>Headphones & Earbuds</MenubarItem>
+                <MenubarItem>Chargers & Cables</MenubarItem>
+                <MenubarItem>Power Banks</MenubarItem>
+                <MenubarItem>Wireless Speakers</MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem>Phone Holders</MenubarItem>
+                <MenubarItem>Camera Accessories</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
+                Smart Home
+              </MenubarTrigger>
+              <MenubarContent className="bg-popover border-border">
+                <MenubarItem>Smart Speakers</MenubarItem>
+                <MenubarItem>Smart Lights</MenubarItem>
+                <MenubarItem>Security Cameras</MenubarItem>
+                <MenubarItem>Smart Thermostats</MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem>Smart Plugs</MenubarItem>
+                <MenubarItem>Home Automation</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
+                Gaming
+              </MenubarTrigger>
+              <MenubarContent className="bg-popover border-border">
+                <MenubarItem>Gaming Consoles</MenubarItem>
+                <MenubarItem>Gaming Controllers</MenubarItem>
+                <MenubarItem>Gaming Keyboards</MenubarItem>
+                <MenubarItem>Gaming Mice</MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem>Gaming Headsets</MenubarItem>
+                <MenubarItem>Gaming Chairs</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            <MenubarMenu>
+              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
+                Deals
+              </MenubarTrigger>
+              <MenubarContent className="bg-popover border-border">
+                <MenubarItem>Daily Deals</MenubarItem>
+                <MenubarItem>Flash Sales</MenubarItem>
+                <MenubarItem>Clearance</MenubarItem>
+                <MenubarItem>Bundle Offers</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+          </Menubar>
         </div>
       </nav>
     </header>
