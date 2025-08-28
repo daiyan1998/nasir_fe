@@ -196,56 +196,60 @@ const Header = () => {
       {/* Navigation - Desktop */}
       <nav className="border-t border-gray-700 hidden md:block">
         <div className="container mx-auto px-4 py-2">
-          <NavigationMenu>
-            <NavigationMenuList className="flex space-x-1">
-              {menuItems.map((menu) => (
-                <NavigationMenuItem key={menu.title}>
-                  <NavigationMenuTrigger 
-                    className="bg-transparent text-white hover:text-white hover:bg-[#F97316] data-[state=open]:bg-[#F97316] data-[state=open]:text-white font-medium px-4 py-2 rounded transition-colors"
-                  >
-                    {menu.title}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="min-w-[300px] p-4 bg-white rounded-lg shadow-lg border z-50">
-                    <div className="grid gap-2">
-                      {menu.items.map((item) => {
-                        if (typeof item === 'string') {
-                          return (
-                            <NavigationMenuLink
-                              key={item}
-                              className="block px-3 py-2 text-sm text-black hover:bg-[#F97316] hover:text-white rounded transition-colors cursor-pointer"
-                            >
-                              {item}
-                            </NavigationMenuLink>
-                          );
-                        } else {
-                          // Handle nested submenu
-                          return (
-                            <div key={item.title} className="relative group">
-                              <NavigationMenuLink className="block px-3 py-2 text-sm text-black hover:bg-[#F97316] hover:text-white rounded transition-colors cursor-pointer">
-                                {item.title}
-                                <span className="ml-2">→</span>
+          <div className="relative w-full overflow-hidden">
+            <NavigationMenu className="max-w-full">
+              <NavigationMenuList className="flex flex-wrap justify-start space-x-1">
+                {menuItems.map((menu) => (
+                  <NavigationMenuItem key={menu.title} className="relative">
+                    <NavigationMenuTrigger 
+                      className="bg-transparent text-white hover:text-white hover:bg-brand-orange data-[state=open]:bg-brand-orange data-[state=open]:text-white font-medium px-3 py-2 rounded transition-colors text-sm whitespace-nowrap"
+                    >
+                      {menu.title}
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent className="absolute top-full left-0 mt-1 min-w-[280px] max-w-[400px] p-4 bg-white rounded-lg shadow-lg border z-50 data-[motion=from-start]:animate-in data-[motion=from-start]:slide-in-from-left-52 data-[motion=from-end]:animate-in data-[motion=from-end]:slide-in-from-right-52 data-[motion=to-start]:animate-out data-[motion=to-start]:slide-out-to-left-52 data-[motion=to-end]:animate-out data-[motion=to-end]:slide-out-to-right-52">
+                      <div className="grid gap-1">
+                        {menu.items.map((item) => {
+                          if (typeof item === 'string') {
+                            return (
+                              <NavigationMenuLink
+                                key={item}
+                                className="block px-3 py-2 text-sm text-foreground hover:bg-brand-orange hover:text-white rounded transition-colors cursor-pointer"
+                              >
+                                {item}
                               </NavigationMenuLink>
-                              {/* Submenu */}
-                              <div className="absolute left-full top-0 ml-1 min-w-[200px] p-2 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60]">
-                                {item.submenu.map((subItem: string) => (
-                                  <NavigationMenuLink
-                                    key={subItem}
-                                    className="block px-3 py-2 text-sm text-black hover:bg-[#F97316] hover:text-white rounded transition-colors cursor-pointer"
-                                  >
-                                    {subItem}
-                                  </NavigationMenuLink>
-                                ))}
+                            );
+                          } else {
+                            // Handle nested submenu with proper flyout
+                            return (
+                              <div key={item.title} className="relative group/submenu">
+                                <NavigationMenuLink className="flex items-center justify-between px-3 py-2 text-sm text-foreground hover:bg-brand-orange hover:text-white rounded transition-colors cursor-pointer group-hover/submenu:bg-brand-orange group-hover/submenu:text-white">
+                                  <span>{item.title}</span>
+                                  <span className="ml-2 text-xs">▶</span>
+                                </NavigationMenuLink>
+                                {/* Flyout Submenu */}
+                                <div className="absolute left-full top-0 ml-1 min-w-[200px] p-2 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all duration-200 z-[70] pointer-events-none group-hover/submenu:pointer-events-auto">
+                                  <div className="space-y-1">
+                                    {item.submenu.map((subItem: string) => (
+                                      <NavigationMenuLink
+                                        key={subItem}
+                                        className="block px-3 py-2 text-sm text-foreground hover:bg-brand-orange hover:text-white rounded transition-colors cursor-pointer"
+                                      >
+                                        {subItem}
+                                      </NavigationMenuLink>
+                                    ))}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        }
-                      })}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
+                            );
+                          }
+                        })}
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
         </div>
       </nav>
     </header>
