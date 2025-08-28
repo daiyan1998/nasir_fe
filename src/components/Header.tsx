@@ -1,18 +1,107 @@
-import { Search, ShoppingCart, User, Heart, Bell } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Bell, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CartDrawer } from "./cart/CartDrawer";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarSeparator,
-  MenubarTrigger,
-} from "@/components/ui/menubar";
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const Header = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const menuItems = [
+    {
+      title: "Apple Products",
+      items: ["iPhone", "MacBook", "iPad", "Apple Watch", "AirPods", "Accessories"]
+    },
+    {
+      title: "Phones",
+      items: ["iPhone", "Samsung Galaxy", "Google Pixel", "OnePlus", "Xiaomi", "HONOR"]
+    },
+    {
+      title: "Tablet",
+      items: [
+        "iPad",
+        {
+          title: "Tablet",
+          submenu: ["Galaxy Tab", "HONOR Tab", "Xiaomi Pad", "Amazon"]
+        },
+        "Galaxy Tab",
+        "HONOR Tab", 
+        "Xiaomi Pad",
+        "Amazon"
+      ]
+    },
+    {
+      title: "Sound Equipment",
+      items: ["Headphones", "Speakers", "Earbuds", "Sound Bars", "Microphones", "Audio Cables"]
+    },
+    {
+      title: "Power & Accessories",
+      items: ["Chargers", "Power Banks", "Cables", "Adapters", "Wireless Chargers", "Car Accessories"]
+    },
+    {
+      title: "Fitness & Wearable",
+      items: ["Smartwatches", "Fitness Trackers", "Heart Rate Monitors", "Sport Accessories", "Health Monitors"]
+    },
+    {
+      title: "Peripherals",
+      items: ["Keyboards", "Mice", "Monitors", "Webcams", "Printers", "External Storage"]
+    },
+    {
+      title: "Cover & Glass",
+      items: ["Phone Cases", "Screen Protectors", "Tablet Cases", "Laptop Sleeves", "Camera Protection"]
+    },
+    {
+      title: "Smart Electronics",
+      items: ["Smart Home", "IoT Devices", "Smart Lights", "Security Cameras", "Smart Speakers"]
+    },
+    {
+      title: "Used Device",
+      items: ["Refurbished Phones", "Used Laptops", "Pre-owned Tablets", "Second-hand Accessories"]
+    }
+  ];
+
+  const renderMobileMenuItem = (item: any) => {
+    if (typeof item === 'string') {
+      return (
+        <a
+          key={item}
+          href="#"
+          className="block px-4 py-2 text-sm text-foreground hover:bg-[#F97316] hover:text-white rounded transition-colors"
+        >
+          {item}
+        </a>
+      );
+    }
+    
+    return (
+      <div key={item.title} className="px-4 py-2">
+        <div className="font-medium text-sm text-foreground mb-2">{item.title}</div>
+        <div className="pl-4 space-y-1">
+          {item.submenu.map((subItem: string) => (
+            <a
+              key={subItem}
+              href="#"
+              className="block py-1 text-sm text-muted-foreground hover:text-[#F97316] transition-colors"
+            >
+              {subItem}
+            </a>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <header className="bg-brand-dark text-white">
       {/* Top bar */}
@@ -45,7 +134,7 @@ const Header = () => {
           </div>
 
           {/* Search bar */}
-          <div className="flex-1 max-w-2xl mx-8">
+          <div className="flex-1 max-w-2xl mx-8 hidden md:block">
             <div className="relative">
               <Input
                 type="text"
@@ -63,131 +152,100 @@ const Header = () => {
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="text-white hover:text-brand-orange hover:bg-transparent">
+            <Button variant="ghost" size="sm" className="text-white hover:text-brand-orange hover:bg-transparent hidden md:flex">
               <User className="h-5 w-5" />
-              <span className="ml-1 hidden md:inline">Account</span>
+              <span className="ml-1">Account</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-white hover:text-brand-orange hover:bg-transparent">
+            <Button variant="ghost" size="sm" className="text-white hover:text-brand-orange hover:bg-transparent hidden md:flex">
               <Heart className="h-5 w-5" />
-              <span className="ml-1 hidden md:inline">Wishlist</span>
+              <span className="ml-1">Wishlist</span>
             </Button>
             <CartDrawer />
+            
+            {/* Mobile menu button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-white md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0">
+                <div className="flex flex-col h-full">
+                  <div className="p-4 border-b">
+                    <h2 className="font-bold text-lg">Menu</h2>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {menuItems.map((menu) => (
+                      <div key={menu.title} className="border-b">
+                        <div className="px-4 py-3 font-medium text-foreground bg-muted/50">
+                          {menu.title}
+                        </div>
+                        <div className="py-2">
+                          {menu.items.map((item) => renderMobileMenuItem(item))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="border-t border-gray-700">
+      {/* Navigation - Desktop */}
+      <nav className="border-t border-gray-700 hidden md:block">
         <div className="container mx-auto px-4 py-2">
-          <Menubar className="bg-transparent border-0 h-auto p-0">
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange font-medium bg-transparent">
-                Home
-              </MenubarTrigger>
-            </MenubarMenu>
-            
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
-                Smartphones
-              </MenubarTrigger>
-              <MenubarContent className="bg-popover border-border">
-                <MenubarItem>iPhone</MenubarItem>
-                <MenubarItem>Samsung Galaxy</MenubarItem>
-                <MenubarItem>Google Pixel</MenubarItem>
-                <MenubarItem>OnePlus</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Cases & Protection</MenubarItem>
-                <MenubarItem>Screen Protectors</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
-                Laptops
-              </MenubarTrigger>
-              <MenubarContent className="bg-popover border-border">
-                <MenubarItem>MacBook</MenubarItem>
-                <MenubarItem>Gaming Laptops</MenubarItem>
-                <MenubarItem>Business Laptops</MenubarItem>
-                <MenubarItem>Ultrabooks</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Laptop Bags</MenubarItem>
-                <MenubarItem>Cooling Pads</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
-                Tablets
-              </MenubarTrigger>
-              <MenubarContent className="bg-popover border-border">
-                <MenubarItem>iPad</MenubarItem>
-                <MenubarItem>Samsung Galaxy Tab</MenubarItem>
-                <MenubarItem>Surface Tablets</MenubarItem>
-                <MenubarItem>Android Tablets</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Tablet Cases</MenubarItem>
-                <MenubarItem>Stylus & Pens</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
-                Accessories
-              </MenubarTrigger>
-              <MenubarContent className="bg-popover border-border">
-                <MenubarItem>Headphones & Earbuds</MenubarItem>
-                <MenubarItem>Chargers & Cables</MenubarItem>
-                <MenubarItem>Power Banks</MenubarItem>
-                <MenubarItem>Wireless Speakers</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Phone Holders</MenubarItem>
-                <MenubarItem>Camera Accessories</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
-                Smart Home
-              </MenubarTrigger>
-              <MenubarContent className="bg-popover border-border">
-                <MenubarItem>Smart Speakers</MenubarItem>
-                <MenubarItem>Smart Lights</MenubarItem>
-                <MenubarItem>Security Cameras</MenubarItem>
-                <MenubarItem>Smart Thermostats</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Smart Plugs</MenubarItem>
-                <MenubarItem>Home Automation</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
-                Gaming
-              </MenubarTrigger>
-              <MenubarContent className="bg-popover border-border">
-                <MenubarItem>Gaming Consoles</MenubarItem>
-                <MenubarItem>Gaming Controllers</MenubarItem>
-                <MenubarItem>Gaming Keyboards</MenubarItem>
-                <MenubarItem>Gaming Mice</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Gaming Headsets</MenubarItem>
-                <MenubarItem>Gaming Chairs</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-
-            <MenubarMenu>
-              <MenubarTrigger className="text-white hover:text-brand-orange data-[state=open]:text-brand-orange bg-transparent">
-                Deals
-              </MenubarTrigger>
-              <MenubarContent className="bg-popover border-border">
-                <MenubarItem>Daily Deals</MenubarItem>
-                <MenubarItem>Flash Sales</MenubarItem>
-                <MenubarItem>Clearance</MenubarItem>
-                <MenubarItem>Bundle Offers</MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
-          </Menubar>
+          <NavigationMenu>
+            <NavigationMenuList className="flex space-x-1">
+              {menuItems.map((menu) => (
+                <NavigationMenuItem key={menu.title}>
+                  <NavigationMenuTrigger 
+                    className="bg-transparent text-white hover:text-white hover:bg-[#F97316] data-[state=open]:bg-[#F97316] data-[state=open]:text-white font-medium px-4 py-2 rounded transition-colors"
+                  >
+                    {menu.title}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="min-w-[300px] p-4 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="grid gap-2">
+                      {menu.items.map((item) => {
+                        if (typeof item === 'string') {
+                          return (
+                            <NavigationMenuLink
+                              key={item}
+                              className="block px-3 py-2 text-sm text-black hover:bg-[#F97316] hover:text-white rounded transition-colors cursor-pointer"
+                            >
+                              {item}
+                            </NavigationMenuLink>
+                          );
+                        } else {
+                          // Handle nested submenu
+                          return (
+                            <div key={item.title} className="relative group">
+                              <NavigationMenuLink className="block px-3 py-2 text-sm text-black hover:bg-[#F97316] hover:text-white rounded transition-colors cursor-pointer">
+                                {item.title}
+                                <span className="ml-2">→</span>
+                              </NavigationMenuLink>
+                              {/* Submenu */}
+                              <div className="absolute left-full top-0 ml-1 min-w-[200px] p-2 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60]">
+                                {item.submenu.map((subItem: string) => (
+                                  <NavigationMenuLink
+                                    key={subItem}
+                                    className="block px-3 py-2 text-sm text-black hover:bg-[#F97316] hover:text-white rounded transition-colors cursor-pointer"
+                                  >
+                                    {subItem}
+                                  </NavigationMenuLink>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                      })}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
       </nav>
     </header>
