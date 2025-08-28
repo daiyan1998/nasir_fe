@@ -8,66 +8,48 @@ import { Input } from "@/components/ui/input";
 import { Star, Heart, ShoppingCart, Plus, Minus, Truck, Shield, RefreshCw } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useGetProductById, useGetProducts } from "@/hooks/queries/useProductQuery";
+import ProductAttributes from "@/components/ProductAttributes";
+import { useCartStore } from "@/stores/cartStore";
 
 const Product = () => {
   const { id } = useParams();
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("45mm");
-  const [quantity, setQuantity] = useState(1);
+  const addItem = useCartStore(state => state.addItem);
+  
 
-  // Sample product data - in real app this would come from API/database
+  // hooks
+  const { data: productData, isLoading } = useGetProductById(id);
+  
   const product = {
-    id: "apple-watch-series-10",
-    name: "Apple Watch Series 10",
-    price: "$42000",
-    originalPrice: "$45000",
-    availability: "In Stock",
-    sku: "AW-S10-45",
-    rating: 4.8,
-    reviews: 128,
-    images: [
-      "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png",
-      "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png",
-      "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png",
-      "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png",
-    ],
-    colors: [
-      { name: "Midnight", color: "#1d1d1f" },
-      { name: "Starlight", color: "#faf0e6" },
-      { name: "Silver", color: "#e3e4e6" },
-      { name: "Gold", color: "#fad5a5" },
-      { name: "Product Red", color: "#ba0c2f" }
-    ],
-    sizes: ["41mm", "45mm"],
-    features: [
-      "S10 SiP with 64-bit dual-core processor",
-      "Digital Crown with haptic feedback",
-      "Blood Oxygen sensor",
-      "ECG app",
-      "Always-On Retina display",
-      "Water resistant to 50 metres"
-    ]
+    ...productData,
+    productId: productData?.id,
+    images: productData?.images?.map(img => img.url),
+    price: productData?.salePrice,
+    originalPrice: productData?.price,
+    availability:
+      productData?.trackInventory && productData?.stock <= productData?.lowStockThreshold
+        ? "Low Stock"
+        : "In Stock",
+    rating: 4.5, // stub
+    reviews: 120, // stub
+    colors: [{ name: "White", color: "#fff" }], // derive from variants/attributeValues
+    sizes: ["Standard"], // derive from variants/attributeValues
+    features: [productData?.shortDesc],
+  
   };
 
-  const specifications = [
-    { label: "Display", value: "Always-On Retina LTPO OLED" },
-    { label: "Processor", value: "Apple S10" },
-    { label: "Storage", value: "64GB" },
-    { label: "Connectivity", value: "GPS + Cellular" },
-    { label: "Battery Life", value: "Up to 18 hours" },
-    { label: "Water Resistance", value: "50 meters" },
-    { label: "Operating System", value: "watchOS 11" },
-    { label: "Sensors", value: "Blood Oxygen, ECG, Heart Rate" }
-  ];
-
-  const relatedProducts = [
-    { id: 1, name: "Apple Watch Ultra 2 with Ocean Band", price: "$22000", image: "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png" },
-    { id: 2, name: "Apple Watch Ultra 2 with Alpine Loop", price: "$24000", image: "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png" },
-    { id: 3, name: "Apple Watch SE 2024", price: "$12000", image: "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png" },
-    { id: 4, name: "Apple Watch Ultra 2 with Trail Loop", price: "$26000", image: "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png" },
-    { id: 5, name: "Apple Watch SE Premium Band", price: "$15000", image: "/lovable-uploads/679f6642-8ea1-46c4-b88a-b63273316775.png" }
-  ];
+  const [selectedImage, setSelectedImage] = useState(
+    productData?.images?.findIndex(img => img.isPrimary) || 0
+  );
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+  const [quantity, setQuantity] = useState(1);
+  const handleAddToCart = () => {
+    addItem({
+      ...product,
+      quantity: quantity
+    })
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,13 +66,13 @@ const Product = () => {
           <div className="space-y-4">
             <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
               <img
-                src={product.images[selectedImage]}
+                src={product.images?.[selectedImage] || `${'/placeholder.png'}`}
                 alt={product.name}
                 className="w-full h-full object-contain p-8"
               />
             </div>
             <div className="flex space-x-2">
-              {product.images.map((image, index) => (
+              {product.images?.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -142,39 +124,10 @@ const Product = () => {
             </div>
 
             {/* Color Selection */}
-            <div>
-              <h3 className="text-sm font-medium mb-3">Color</h3>
-              <div className="flex space-x-2">
-                {product.colors.map((color, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedColor(index)}
-                    className={`w-10 h-10 rounded-full border-2 ${
-                      selectedColor === index ? "border-[hsl(var(--brand-orange))]" : "border-gray-300"
-                    }`}
-                    style={{ backgroundColor: color.color }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-            </div>
+            <ProductAttributes product={product} />
+         
 
-            {/* Size Selection */}
-            <div>
-              <h3 className="text-sm font-medium mb-3">Size</h3>
-              <div className="flex space-x-2">
-                {product.sizes.map((size) => (
-                  <Button
-                    key={size}
-                    variant={selectedSize === size ? "default" : "outline"}
-                    onClick={() => setSelectedSize(size)}
-                    className={selectedSize === size ? "bg-[hsl(var(--brand-orange))] hover:bg-[hsl(var(--brand-orange-light))]" : ""}
-                  >
-                    {size}
-                  </Button>
-                ))}
-              </div>
-            </div>
+         
 
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
@@ -201,7 +154,7 @@ const Product = () => {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button className="flex-1 bg-[hsl(var(--brand-orange))] hover:bg-[hsl(var(--brand-orange-light))] text-white">
+                <Button onClick={handleAddToCart} className="flex-1 bg-[hsl(var(--brand-orange))] hover:bg-[hsl(var(--brand-orange-light))] text-white">
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Add to Cart
                 </Button>
@@ -232,7 +185,7 @@ const Product = () => {
         {/* Recently Viewed */}
         <div className="mb-12">
           <h2 className="text-xl font-bold mb-6">Recently Viewed</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {relatedProducts.slice(0, 4).map((item) => (
               <Card key={item.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
@@ -242,7 +195,7 @@ const Product = () => {
                 </CardContent>
               </Card>
             ))}
-          </div>
+          </div> */}
         </div>
 
         {/* Product Details Tabs */}
@@ -258,14 +211,14 @@ const Product = () => {
             <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <h3 className="text-lg font-semibold mb-4">Specifications</h3>
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   {specifications.map((spec, index) => (
                     <div key={index} className="flex justify-between py-2 border-b border-gray-100">
                       <span className="font-medium">{spec.label}</span>
                       <span className="text-muted-foreground">{spec.value}</span>
                     </div>
                   ))}
-                </div>
+                </div> */}
               </div>
               
               <div>
@@ -346,7 +299,7 @@ const Product = () => {
         </Tabs>
 
         {/* Related Products */}
-        <div>
+        {/* <div>
           <h2 className="text-xl font-bold mb-6">Related Products</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {relatedProducts.map((item) => (
@@ -362,7 +315,7 @@ const Product = () => {
               </Card>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
 
       <Footer />

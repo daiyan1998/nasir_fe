@@ -16,13 +16,17 @@ interface AttributeFormProps {
 }
 
 export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProps) {
+  
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    type: 'text' as 'text' | 'number' | 'select' | 'boolean',
+    type: 'TEXT' as 'TEXT' | 'NUMBER' | 'SELECT' | 'MULTI_SELECT' | 'BOOLEAN' | 'RANGE',
     unit: '',
     isFilterable: true,
-    values: [] as AttributeValue[]
+    // required: false,
+    attributeValues: [] as AttributeValue[],
+    minValue: 0,
+    maxValue: 100
   })
 
   useEffect(() => {
@@ -33,7 +37,10 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
         type: attribute.type,
         unit: attribute.unit || '',
         isFilterable: attribute.isFilterable,
-        values: attribute.values || []
+        // required: attribute.required || false,
+        attributeValues: attribute.attributeValues || [],
+        minValue: attribute.minValue || 0,
+        maxValue: attribute.maxValue || 100
       })
     }
   }, [attribute])
@@ -57,7 +64,7 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
     setFormData(prev => ({
       ...prev,
       type: type as any,
-      values: type === 'select' ? prev.values : []
+      attributeValues: (type === 'select' || type === 'multi_select') ? prev.attributeValues : []
     }))
   }
 
@@ -65,40 +72,48 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
     const newValue: AttributeValue = {
       id: Math.random().toString(36).substring(7),
       value: '',
-      order: formData.values.length + 1
+      order: formData.attributeValues.length + 1
     }
     setFormData(prev => ({
       ...prev,
-      values: [...prev.values, newValue]
+      attributeValues: [...prev.attributeValues, newValue]
     }))
   }
 
   const handleUpdateValue = (id: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      values: prev.values.map(v => v.id === id ? { ...v, value } : v)
+      attributeValues: prev.attributeValues.map(v => v.id === id ? { ...v, value } : v)
     }))
   }
 
   const handleRemoveValue = (id: string) => {
     setFormData(prev => ({
       ...prev,
-      values: prev.values.filter(v => v.id !== id)
+      attributeValues: prev.attributeValues.filter(v => v.id !== id)
     }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validate select type has values
-    if (formData.type === 'select' && formData.values.length === 0) {
-      alert('Select type attributes must have at least one value')
+    // Validate select/multi_select type has values
+    if ((formData.type === 'SELECT' || formData.type === 'MULTI_SELECT') && formData.attributeValues.length === 0) {
+      alert('Select and Multi-select type attributes must have at least one value')
+      return
+    }
+    
+    // Validate range type has min/max values
+    if (formData.type === 'RANGE' && (formData.minValue >= formData.maxValue)) {
+      alert('Range type attributes must have valid min and max values')
       return
     }
     
     const dataToSave = {
       ...formData,
-      values: formData.type === 'select' ? formData.values : undefined
+      attributeValues: (formData.type === 'SELECT' || formData.type === 'MULTI_SELECT') ? formData.attributeValues : undefined,
+      minValue: formData.type === 'RANGE' ? formData.minValue : undefined,
+      maxValue: formData.type === 'RANGE' ? formData.maxValue : undefined
     }
     
     onSave(dataToSave)
@@ -150,10 +165,12 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="text">Text</SelectItem>
-                <SelectItem value="number">Number</SelectItem>
-                <SelectItem value="select">Select (Dropdown)</SelectItem>
-                <SelectItem value="boolean">Boolean (Yes/No)</SelectItem>
+                <SelectItem value="TEXT">Text</SelectItem>
+                <SelectItem value="NUMBER">Number</SelectItem>
+                <SelectItem value="SELECT">Select (Dropdown)</SelectItem>
+                <SelectItem value="MULTI_SELECT">Multi-Select</SelectItem>
+                <SelectItem value="BOOLEAN">Boolean (Yes/No)</SelectItem>
+                <SelectItem value="RANGE">Range (Min/Max)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -169,26 +186,75 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
           </div>
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="isFilterable">Filterable</Label>
-            <p className="text-sm text-muted-foreground">
-              Allow customers to filter products by this attribute
-            </p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="isFilterable">Filterable</Label>
+              <p className="text-sm text-muted-foreground">
+                Allow customers to filter products by this attribute
+              </p>
+            </div>
+            <Switch
+              id="isFilterable"
+              checked={formData.isFilterable}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFilterable: checked }))}
+            />
           </div>
-          <Switch
-            id="isFilterable"
-            checked={formData.isFilterable}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFilterable: checked }))}
-          />
+          
+          {/* <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="required">Required</Label>
+              <p className="text-sm text-muted-foreground">
+                This attribute is required for products
+              </p>
+            </div>
+            <Switch
+              id="required"
+              checked={formData.required}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, required: checked }))}
+            />
+          </div> */}
         </div>
       </div>
 
-      {/* Select Values */}
-      {formData.type === 'select' && (
+      {/* Range Values */}
+      {formData.type === 'RANGE' && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Range Configuration</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="minValue">Minimum Value</Label>
+              <Input
+                id="minValue"
+                type="number"
+                value={formData.minValue}
+                onChange={(e) => setFormData(prev => ({ ...prev, minValue: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="maxValue">Maximum Value</Label>
+              <Input
+                id="maxValue"
+                type="number"
+                value={formData.maxValue}
+                onChange={(e) => setFormData(prev => ({ ...prev, maxValue: parseFloat(e.target.value) || 100 }))}
+                placeholder="100"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Select/Multi-Select Values */}
+      {(formData.type === 'SELECT' || formData.type === 'MULTI_SELECT') && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Select Values</h3>
+            <h3 className="text-lg font-medium">
+              {formData.type === 'SELECT' ? 'Select Values' : 'Multi-Select Values'}
+            </h3>
             <Button type="button" variant="outline" size="sm" onClick={handleAddValue}>
               <Plus className="mr-2 h-4 w-4" />
               Add Value
@@ -200,12 +266,12 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
               <CardTitle className="text-sm">Available Values</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {formData.values.length === 0 ? (
+              {formData.attributeValues.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   No values added yet. Click "Add Value" to create options.
                 </p>
               ) : (
-                formData.values.map((value, index) => (
+                formData.attributeValues.map((value, index) => (
                   <div key={value.id} className="flex items-center gap-2">
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                     <Badge variant="outline" className="text-xs">

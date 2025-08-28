@@ -7,19 +7,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { orders, Order } from '@/lib/mockData'
 import { ArrowLeft, Printer, Mail, Package, CreditCard, MapPin, User, Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import { useGetOrderById } from '@/hooks/queries/useOrderQuery'
+import { Order } from '@/types/Order.type'
 
 export default function OrderDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { toast } = useToast()
-  const order = orders.find(o => o.id === id)
+  // const order = orders.find(o => o.id === id)
+
+  // hooks
+  const {data: orderResponse} = useGetOrderById(id)
+  const order = orderResponse?.data
   
-  const [currentStatus, setCurrentStatus] = useState<Order['status']>(order?.status || 'pending')
+  const [currentStatus, setCurrentStatus] = useState<Order["status"]>(order?.status || "PENDING")
   const [emailNotifications, setEmailNotifications] = useState(true)
+
+  const subTotal = order?.items.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0)
 
   if (!order) {
     return (
@@ -102,7 +109,7 @@ export default function OrderDetails() {
           <div>
             <h1 className="text-3xl font-bold">{order.orderNumber}</h1>
             <p className="text-muted-foreground">
-              Placed on {format(new Date(order.orderDate), 'MMMM dd, yyyy')}
+              Placed on {format(new Date(order.createdAt), 'MMMM dd, yyyy')}
             </p>
           </div>
         </div>
@@ -130,18 +137,18 @@ export default function OrderDetails() {
               <div className="space-y-4">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                    <img
+                    {/* <img
                       src={item.productImage}
                       alt={item.productName}
                       className="w-16 h-16 object-cover rounded-md"
-                    />
+                    /> */}
                     <div className="flex-1">
-                      <h4 className="font-medium">{item.productName}</h4>
+                      <h4 className="font-medium">{item.product.name}</h4>
                       <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${item.subtotal.toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">${item.price.toFixed(2)} each</p>
+                      <p className="font-medium">${parseFloat(item.price) * item.quantity}</p>
+                      <p className="text-sm text-muted-foreground">${item.price} each</p>
                     </div>
                   </div>
                 ))}
@@ -153,20 +160,20 @@ export default function OrderDetails() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>${order.subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Shipping:</span>
-                  <span>${order.shipping.toFixed(2)}</span>
+                  <span>${subTotal}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax:</span>
-                  <span>${order.tax.toFixed(2)}</span>
+                  <span>${order.taxAmount || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping:</span>
+                  <span>${order.shippingCost}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total:</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>${order.totalAmount}</span>
                 </div>
               </div>
             </CardContent>
@@ -181,7 +188,7 @@ export default function OrderDetails() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              {/* <div className="space-y-4">
                 {order.statusHistory.map((history, index) => (
                   <div key={history.id} className="flex items-start gap-4">
                     <div className={`w-3 h-3 rounded-full mt-2 ${
@@ -200,7 +207,7 @@ export default function OrderDetails() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </div>
@@ -260,9 +267,9 @@ export default function OrderDetails() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <p className="font-medium">{order.customerName}</p>
-                <p className="text-sm text-muted-foreground">{order.customerEmail}</p>
-                <p className="text-sm text-muted-foreground">{order.customerPhone}</p>
+                <p className="font-medium">{order.shippingAddress.fullName}</p>
+                <p className="text-sm text-muted-foreground">{order.shippingAddress.phone || 'N/A'}</p>
+                <p className="text-sm text-muted-foreground">{order.shippingAddress?.email || 'N/A'}</p>
               </div>
             </CardContent>
           </Card>
@@ -277,7 +284,7 @@ export default function OrderDetails() {
             </CardHeader>
             <CardContent>
               <div className="space-y-1 text-sm">
-                <p>{order.shippingAddress.street}</p>
+                <p>{order.shippingAddress.address}</p>
                 <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
                 <p>{order.shippingAddress.country}</p>
               </div>
@@ -292,7 +299,7 @@ export default function OrderDetails() {
                 Payment Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            {/* <CardContent className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-sm">Payment Method:</span>
                 <span className="text-sm font-medium">{order.paymentMethod}</span>
@@ -312,7 +319,7 @@ export default function OrderDetails() {
                   Issue Refund
                 </Button>
               )}
-            </CardContent>
+            </CardContent> */}
           </Card>
         </div>
       </div>

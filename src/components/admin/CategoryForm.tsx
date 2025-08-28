@@ -15,25 +15,35 @@ interface CategoryFormProps {
   onCancel: () => void
 }
 
+interface CategoryFormData  {
+  id?: string
+  name: string
+  slug: string
+  description: string
+  parentId: string | null
+  image: string
+  isActive: boolean
+}
+
 export function CategoryForm({ category, categories, onSave, onCancel }: CategoryFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     slug: '',
     description: '',
-    parentId: '',
+    parentId: null,
     image: '',
-    active: true
+    isActive: true
   })
-
   useEffect(() => {
     if (category) {
       setFormData({
+        id: category.id,
         name: category.name,
         slug: category.slug,
         description: category.description || '',
-        parentId: category.parentId || '',
+        parentId: category.parentId || null,
         image: category.image || '',
-        active: category.active
+        isActive: category.active
       })
     }
   }, [category])
@@ -113,7 +123,7 @@ export function CategoryForm({ category, categories, onSave, onCancel }: Categor
           <Label htmlFor="parentId">Parent Category</Label>
           <Select
             value={formData.parentId || "none"}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value === "none" ? "" : value }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, parentId: value === "none" ? null : value }))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select parent category (optional)" />
@@ -156,9 +166,9 @@ export function CategoryForm({ category, categories, onSave, onCancel }: Categor
             </p>
           </div>
           <Switch
-            id="active"
-            checked={formData.active}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
+            id="isActive"
+            checked={formData.isActive}
+            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
           />
         </div>
       </div>

@@ -14,61 +14,37 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { title } from "process";
+import { Link } from "react-router-dom";
+import { useGetCategories } from "@/hooks/queries/useCategoryQuery";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // hooks
+  const {data: categories} = useGetCategories()
+
   const menuItems = [
     {
-      title: "Apple Products",
-      items: ["iPhone", "MacBook", "iPad", "Apple Watch", "AirPods", "Accessories"]
+      title:'Earbuds',
+      items:[],
+      link:'/earbuds'
     },
     {
-      title: "Phones",
-      items: ["iPhone", "Samsung Galaxy", "Google Pixel", "OnePlus", "Xiaomi", "HONOR"]
+      title:'Smart-Watch',
+      items:[],
+      link:'/smartwatch'
     },
     {
-      title: "Tablet",
-      items: [
-        "iPad",
-        {
-          title: "Tablet",
-          submenu: ["Galaxy Tab", "HONOR Tab", "Xiaomi Pad", "Amazon"]
-        },
-        "Galaxy Tab",
-        "HONOR Tab", 
-        "Xiaomi Pad",
-        "Amazon"
-      ]
+      title:'Powerband',
+      items:[],
+      link:'/powerband'
     },
     {
-      title: "Sound Equipment",
-      items: ["Headphones", "Speakers", "Earbuds", "Sound Bars", "Microphones", "Audio Cables"]
+      title:'Neckband',
+      items:[],
+      link:'/neckband'
     },
-    {
-      title: "Power & Accessories",
-      items: ["Chargers", "Power Banks", "Cables", "Adapters", "Wireless Chargers", "Car Accessories"]
-    },
-    {
-      title: "Fitness & Wearable",
-      items: ["Smartwatches", "Fitness Trackers", "Heart Rate Monitors", "Sport Accessories", "Health Monitors"]
-    },
-    {
-      title: "Peripherals",
-      items: ["Keyboards", "Mice", "Monitors", "Webcams", "Printers", "External Storage"]
-    },
-    {
-      title: "Cover & Glass",
-      items: ["Phone Cases", "Screen Protectors", "Tablet Cases", "Laptop Sleeves", "Camera Protection"]
-    },
-    {
-      title: "Smart Electronics",
-      items: ["Smart Home", "IoT Devices", "Smart Lights", "Security Cameras", "Smart Speakers"]
-    },
-    {
-      title: "Used Device",
-      items: ["Refurbished Phones", "Used Laptops", "Pre-owned Tablets", "Second-hand Accessories"]
-    }
   ];
 
   const renderMobileMenuItem = (item: any) => {
@@ -175,14 +151,16 @@ const Header = () => {
                     <h2 className="font-bold text-lg">Menu</h2>
                   </div>
                   <div className="flex-1 overflow-y-auto">
-                    {menuItems.map((menu) => (
-                      <div key={menu.title} className="border-b">
+                    {categories?.map((menu) => (
+                      <div key={menu.name} className="border-b">
+                        <Link to={menu.slug}>
                         <div className="px-4 py-3 font-medium text-foreground bg-muted/50">
-                          {menu.title}
+                          {menu.name}
                         </div>
-                        <div className="py-2">
-                          {menu.items.map((item) => renderMobileMenuItem(item))}
-                        </div>
+                        </Link>
+                        {/* <div className="py-2">
+                          {menu.items?.map((item) => renderMobileMenuItem(item))}
+                        </div>name*/}
                       </div>
                     ))}
                   </div>
@@ -199,16 +177,18 @@ const Header = () => {
           <div className="relative w-full overflow-hidden">
             <NavigationMenu className="max-w-full">
               <NavigationMenuList className="flex flex-wrap justify-start space-x-1">
-                {menuItems.map((menu) => (
-                  <NavigationMenuItem key={menu.title} className="relative">
+                {categories?.map((menu) => (
+                  <NavigationMenuItem key={menu.id} className="relative">
+                    <Link to={`/category/${ menu.slug }`}>
                     <NavigationMenuTrigger 
                       className="bg-transparent text-white hover:text-white hover:bg-brand-orange data-[state=open]:bg-brand-orange data-[state=open]:text-white font-medium px-3 py-2 rounded transition-colors text-sm whitespace-nowrap"
                     >
-                      {menu.title}
+                      {menu.name}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="absolute top-full left-0 mt-1 min-w-[280px] max-w-[400px] p-4 bg-white rounded-lg shadow-lg border z-50 data-[motion=from-start]:animate-in data-[motion=from-start]:slide-in-from-left-52 data-[motion=from-end]:animate-in data-[motion=from-end]:slide-in-from-right-52 data-[motion=to-start]:animate-out data-[motion=to-start]:slide-out-to-left-52 data-[motion=to-end]:animate-out data-[motion=to-end]:slide-out-to-right-52">
+                    </Link>
+                    {/* <NavigationMenuContent className="absolute top-full left-0 mt-1 min-w-[280px] max-w-[400px] p-4 bg-white rounded-lg shadow-lg border z-50 data-[motion=from-start]:animate-in data-[motion=from-start]:slide-in-from-left-52 data-[motion=from-end]:animate-in data-[motion=from-end]:slide-in-from-right-52 data-[motion=to-start]:animate-out data-[motion=to-start]:slide-out-to-left-52 data-[motion=to-end]:animate-out data-[motion=to-end]:slide-out-to-right-52">
                       <div className="grid gap-1">
-                        {menu.items.map((item) => {
+                        {menu.items?.map((item) => {
                           if (typeof item === 'string') {
                             return (
                               <NavigationMenuLink
@@ -219,14 +199,12 @@ const Header = () => {
                               </NavigationMenuLink>
                             );
                           } else {
-                            // Handle nested submenu with proper flyout
                             return (
                               <div key={item.title} className="relative group/submenu">
                                 <NavigationMenuLink className="flex items-center justify-between px-3 py-2 text-sm text-foreground hover:bg-brand-orange hover:text-white rounded transition-colors cursor-pointer group-hover/submenu:bg-brand-orange group-hover/submenu:text-white">
                                   <span>{item.title}</span>
                                   <span className="ml-2 text-xs">▶</span>
                                 </NavigationMenuLink>
-                                {/* Flyout Submenu */}
                                 <div className="absolute left-full top-0 ml-1 min-w-[200px] p-2 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all duration-200 z-[70] pointer-events-none group-hover/submenu:pointer-events-auto">
                                   <div className="space-y-1">
                                     {item.submenu.map((subItem: string) => (
@@ -244,7 +222,7 @@ const Header = () => {
                           }
                         })}
                       </div>
-                    </NavigationMenuContent>
+                    </NavigationMenuContent> */}
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>

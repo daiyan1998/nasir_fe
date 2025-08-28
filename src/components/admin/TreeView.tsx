@@ -10,6 +10,7 @@ interface TreeViewProps {
   onDelete: (categoryId: string) => void
   onToggleActive: (categoryId: string) => void
   onReorder: (newOrder: Category[]) => void
+  onSelect?: (categoryId: string) => void
 }
 
 interface TreeNodeProps {
@@ -18,9 +19,10 @@ interface TreeNodeProps {
   onEdit: (category: Category) => void
   onDelete: (categoryId: string) => void
   onToggleActive: (categoryId: string) => void
+  onSelect?: (categoryId: string) => void
 }
 
-function TreeNode({ category, level, onEdit, onDelete, onToggleActive }: TreeNodeProps) {
+function TreeNode({ category, level, onEdit, onDelete, onToggleActive, onSelect }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const hasChildren = category.children && category.children.length > 0
 
@@ -41,6 +43,7 @@ function TreeNode({ category, level, onEdit, onDelete, onToggleActive }: TreeNod
       <div 
         className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 group cursor-pointer"
         style={{ paddingLeft: `${level * 24 + 8}px` }}
+        onClick={() => onSelect?.(category.id)}
       >
         {/* Expand/Collapse Button */}
         <div className="w-4 h-4 flex items-center justify-center">
@@ -81,8 +84,8 @@ function TreeNode({ category, level, onEdit, onDelete, onToggleActive }: TreeNod
         {/* Category Info */}
         <div className="flex-1 flex items-center gap-2">
           <span className="font-medium">{category.name}</span>
-          <Badge variant={category.active ? 'default' : 'secondary'} className="text-xs">
-            {category.active ? 'Active' : 'Inactive'}
+          <Badge variant={category.isActive ? 'default' : 'secondary'} className="text-xs">
+            {category.isActive ? 'Active' : 'Inactive'}
           </Badge>
           {hasChildren && (
             <Badge variant="outline" className="text-xs">
@@ -98,9 +101,9 @@ function TreeNode({ category, level, onEdit, onDelete, onToggleActive }: TreeNod
             size="sm"
             className="h-8 w-8 p-0"
             onClick={handleToggleActive}
-            title={category.active ? 'Deactivate' : 'Activate'}
+            title={category.isActive ? 'Deactivate' : 'Activate'}
           >
-            {category.active ? (
+            {category.isActive ? (
               <EyeOff className="h-3 w-3" />
             ) : (
               <Eye className="h-3 w-3" />
@@ -141,6 +144,7 @@ function TreeNode({ category, level, onEdit, onDelete, onToggleActive }: TreeNod
               onEdit={onEdit}
               onDelete={onDelete}
               onToggleActive={onToggleActive}
+              onSelect={onSelect}
             />
           ))}
         </div>
@@ -149,7 +153,7 @@ function TreeNode({ category, level, onEdit, onDelete, onToggleActive }: TreeNod
   )
 }
 
-export function TreeView({ data, onEdit, onDelete, onToggleActive, onReorder }: TreeViewProps) {
+export function TreeView({ data, onEdit, onDelete, onToggleActive, onReorder, onSelect }: TreeViewProps) {
   return (
     <div className="space-y-1">
       {data.length === 0 ? (
@@ -167,6 +171,7 @@ export function TreeView({ data, onEdit, onDelete, onToggleActive, onReorder }: 
             onEdit={onEdit}
             onDelete={onDelete}
             onToggleActive={onToggleActive}
+            onSelect={onSelect}
           />
         ))
       )}

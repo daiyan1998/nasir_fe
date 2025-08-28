@@ -1,33 +1,18 @@
 
 import { PaymentForm } from '@/components/payment/PaymentForm'
 import { Button } from '@/components/ui/button'
+import { useCartStore } from '@/stores/cartStore'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 // Mock cart data - in a real app this would come from context/state management
-const mockCartItems = [
-  {
-    id: '1',
-    name: 'iPhone 16 Pro Max',
-    price: 1199.99,
-    quantity: 1,
-    image: '/src/assets/iphone-16-hero.jpg'
-  },
-  {
-    id: '2',
-    name: 'AirPods Pro',
-    price: 249.99,
-    quantity: 2,
-    image: '/src/assets/airpods-pro.jpg'
-  }
-]
 
-const subtotal = mockCartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-const shipping = 9.99
-const tax = subtotal * 0.08 // 8% tax
-const total = subtotal + shipping + tax
+
 
 export default function Checkout() {
+const items = useCartStore(state => state.items)
+const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+const total = subtotal 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -51,10 +36,8 @@ export default function Checkout() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <PaymentForm
-          items={mockCartItems}
+          items={items}
           subtotal={subtotal}
-          shipping={shipping}
-          tax={tax}
           total={total}
         />
       </div>

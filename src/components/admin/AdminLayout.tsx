@@ -31,6 +31,7 @@ const menuItems = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { title: 'Products', href: '/admin/products', icon: Package },
   { title: 'Categories', href: '/admin/categories', icon: FolderTree },
+  { title: 'Attributes', href: '/admin/attributes', icon: FolderTree },
   { title: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { title: 'Users', href: '/admin/users', icon: Users },
   { title: 'Reviews', href: '/admin/reviews', icon: Star },

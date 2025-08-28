@@ -9,14 +9,28 @@ import { CategoryAttributeAssignment } from '@/components/admin/CategoryAttribut
 import { attributes as initialAttributes, Attribute, categoryAttributes as initialCategoryAttributes, CategoryAttribute } from '@/lib/mockData'
 import { Plus, Settings, Filter, Type } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCreateAttribute, useDeleteAttribute, useImportAttributes } from '@/hooks/mutations/useAttributeMutation'
+import { useGetAttributes } from '@/hooks/queries/useAttributeQuery'
+import { useAssignAttributeToCategory } from '@/hooks/mutations/useCategoryAttributeMutation'
+import { useGetCategoryAttributes } from '@/hooks/queries/useCategoryAttributeQuery'
+import { ImportCSVForm } from '@/components/admin/ImportCSVForm'
 
 export default function Attributes() {
-  const [attributes, setAttributes] = useState<Attribute[]>(initialAttributes)
-  const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>(initialCategoryAttributes)
+  // const [attributes, setAttributes] = useState<Attribute[]>(initialAttributes)
+  // const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>(initialCategoryAttributes)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isImportOpen, setIsImportOpen] = useState(false)
   const [isAssignmentOpen, setIsAssignmentOpen] = useState(false)
   const [editingAttribute, setEditingAttribute] = useState<Attribute | null>(null)
   const { toast } = useToast()
+
+  // hooks
+  const {mutate: createAttribute} = useCreateAttribute()
+  const {data: attributes = []} = useGetAttributes()
+  const {mutate: deleteAttribute} = useDeleteAttribute()
+  const {mutate: assignAttributeToCategory} = useAssignAttributeToCategory()
+  const {data: categoryAttributes = []} = useGetCategoryAttributes()
+  const {mutate: importAttributes} = useImportAttributes()
 
   const getTypeBadge = (type: string) => {
     const colors = {
@@ -52,14 +66,15 @@ export default function Attributes() {
       )
     },
     {
-      key: 'values',
+      // Fix: show attribute values
+      key: 'attributeValues',
       header: 'Values',
       render: (attribute) => (
         <div>
-          {attribute.type === 'select' && attribute.values ? (
+          {attribute.type === 'SELECT' && attribute.attributeValues ? (
             <div className="text-sm">
-              {attribute.values.slice(0, 3).map(v => v.value).join(', ')}
-              {attribute.values.length > 3 && ` +${attribute.values.length - 3} more`}
+              {attribute.attributeValues.slice(0, 3).map(v => v.value).join(', ')}
+              {attribute.attributeValues.length > 3 && ` +${attribute.attributeValues.length - 3} more`}
             </div>
           ) : (
             <span className="text-muted-foreground">—</span>
@@ -95,10 +110,10 @@ export default function Attributes() {
       key: 'type' as keyof Attribute,
       label: 'Type',
       options: [
-        { label: 'Text', value: 'text' },
-        { label: 'Number', value: 'number' },
-        { label: 'Select', value: 'select' },
-        { label: 'Boolean', value: 'boolean' }
+        { label: 'Text', value: 'TEXT' },
+        { label: 'Number', value: 'NUMBER' },
+        { label: 'Select', value: 'SELECT' },
+        { label: 'Boolean', value: 'BOOLEAN' }
       ]
     },
     {
@@ -117,39 +132,17 @@ export default function Attributes() {
   }
 
   const handleDelete = (attribute: Attribute) => {
-    setAttributes(prev => prev.filter(a => a.id !== attribute.id))
-    setCategoryAttributes(prev => prev.filter(ca => ca.attributeId !== attribute.id))
-    toast({
-      title: "Attribute deleted",
-      description: `${attribute.name} has been deleted successfully.`
-    })
+    deleteAttribute(attribute.id)
   }
 
   const handleSaveAttribute = (attributeData: Partial<Attribute>) => {
     if (editingAttribute) {
-      // Update existing attribute
-      setAttributes(prev => prev.map(a => 
-        a.id === editingAttribute.id 
-          ? { ...a, ...attributeData } as Attribute
-          : a
-      ))
       toast({
         title: "Attribute updated",
         description: `${attributeData.name} has been updated successfully.`
       })
     } else {
-      // Add new attribute
-      const newAttribute: Attribute = {
-        id: Math.random().toString(36).substring(7),
-        createdAt: new Date().toISOString().split('T')[0],
-        ...attributeData
-      } as Attribute
-      
-      setAttributes(prev => [newAttribute, ...prev])
-      toast({
-        title: "Attribute created",
-        description: `${attributeData.name} has been created successfully.`
-      })
+      createAttribute(attributeData)
     }
     
     setIsFormOpen(false)
@@ -162,12 +155,12 @@ export default function Attributes() {
   }
 
   const handleSaveCategoryAttributes = (newCategoryAttributes: CategoryAttribute[]) => {
-    setCategoryAttributes(newCategoryAttributes)
-    setIsAssignmentOpen(false)
-    toast({
-      title: "Category attributes updated",
-      description: "Attribute assignments have been saved successfully."
-    })
+    const categoryIdAttributes = newCategoryAttributes.map(ca => ({categoryId: ca.categoryId, attributeId: ca.attributeId})).filter(ca => ca.categoryId || ca.attributeId)
+    // assignAttributeToCategory(newCategoryAttributes)
+  }
+
+  const handleDataImport = (csvData: any[]) => {
+    importAttributes(csvData)
   }
 
   return (
@@ -194,6 +187,13 @@ export default function Attributes() {
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Attribute
+          </Button>
+          <Button 
+            onClick={() => setIsImportOpen(true)}
+            className="bg-brand-orange hover:bg-brand-orange/90"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Import Attributes
           </Button>
         </div>
       </div>
@@ -228,7 +228,7 @@ export default function Attributes() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {attributes.filter(a => a.type === 'select').length}
+              {attributes.filter(a => a.type === 'SELECT').length}
             </div>
           </CardContent>
         </Card>
@@ -262,6 +262,15 @@ export default function Attributes() {
           />
         </CardContent>
       </Card>
+      {/* Import CSV modal */}
+      <Modal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+      >
+        <ImportCSVForm 
+          onDataImport={handleDataImport}
+        />
+      </Modal>
 
       {/* Attribute Form Modal */}
       <Modal

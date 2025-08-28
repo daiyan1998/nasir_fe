@@ -1,28 +1,44 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DataTable, Column } from '@/components/admin/DataTable'
-import { orders as initialOrders, Order } from '@/lib/mockData'
 import { Plus, Download, Calendar, DollarSign, Package, Clock } from 'lucide-react'
 import { format } from 'date-fns'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useGetOrders } from '@/hooks/queries/useOrderQuery'
+import { Order } from '@/types/Order.type'
+import { PaginationV1 } from '@/components/PaginationV1'
+
+
+
 
 export default function Orders() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders)
+  // const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = Number(searchParams.get('page') || 1)
+  const limit = Number(searchParams.get('limit') || 10)
+
+  // hooks
+  const {data: ordersData} = useGetOrders({page, limit})
+  const orders = ordersData?.data ?? []
+  const totalPages = ordersData?.meta.totalPages ?? 1
+
+
+  
 
   const getStatusBadge = (status: Order['status']) => {
     const variants = {
-      pending: 'secondary',
-      confirmed: 'outline',
-      shipped: 'default',
-      delivered: 'default',
-      cancelled: 'destructive'
+      PENDING: 'secondary',
+      CONFIRMED: 'outline',
+      SHIPPED: 'default',
+      DELIVERED: 'default',
+      CANCELLED: 'destructive'
     }
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100',
@@ -65,18 +81,18 @@ export default function Orders() {
             {order.orderNumber}
           </div>
           <div className="text-sm text-muted-foreground">
-            {format(new Date(order.orderDate), 'MMM dd, yyyy')}
+            {format(new Date(order.createdAt), 'MMM dd, yyyy')}
           </div>
         </div>
       )
     },
     {
-      key: 'customerName',
+      key: 'shippingAddress',
       header: 'Customer',
       render: (order) => (
         <div>
-          <div className="font-medium">{order.customerName}</div>
-          <div className="text-sm text-muted-foreground">{order.customerEmail}</div>
+          <div className="font-medium">{order.shippingAddress.fullName}</div>
+          <div className="text-sm text-muted-foreground">{order.shippingAddress.phone}</div>
         </div>
       )
     },
@@ -86,17 +102,17 @@ export default function Orders() {
       render: (order) => getStatusBadge(order.status)
     },
     {
-      key: 'total',
+      key: 'totalAmount',
       header: 'Total',
       render: (order) => (
-        <div className="font-medium">${order.total.toFixed(2)}</div>
+        <div className="font-medium">${order.totalAmount}</div>
       )
     },
-    {
-      key: 'paymentStatus',
-      header: 'Payment',
-      render: (order) => getPaymentStatusBadge(order.paymentStatus)
-    },
+    // {
+    //   key: 'paymentStatus',
+    //   header: 'Payment',
+    //   render: (order) => getPaymentStatusBadge(order.paymentStatus)
+    // },
     {
       key: 'items',
       header: 'Items',
@@ -278,6 +294,7 @@ export default function Orders() {
           />
         </CardContent>
       </Card>
+      <PaginationV1 page={page} totalPages={totalPages} onPageChange={(newPage) => setSearchParams({page: newPage.toString(), limit: limit.toString()})}/>
     </div>
   )
 }

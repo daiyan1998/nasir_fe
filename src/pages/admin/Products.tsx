@@ -4,21 +4,42 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DataTable, Column } from '@/components/admin/DataTable'
 import { Modal } from '@/components/ui/modal'
-import { ProductForm } from '@/components/admin/ProductForm'
-import { products as initialProducts, categories, Product } from '@/lib/mockData'
+import { EnhancedProductForm } from '@/components/admin/EnhancedProductForm'
+// import { products as initialProducts, categories, Product } from '@/lib/mockData'
 import { Plus, Package } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCreateProduct, useDeleteProduct, useUpdateProduct } from '@/hooks/mutations/useProductMutation'
+import { useGetProducts } from '@/hooks/queries/useProductQuery'
+import { Product } from '@/types/Product.type'
+import { getImageUrl } from '@/utils/getImageUrl'
+import { PaginationV1 } from '@/components/PaginationV1'
+import {useSearchParams} from 'react-router-dom';
 
 export default function Products() {
-  const [products, setProducts] = useState<Product[]>(initialProducts)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const { toast } = useToast()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = Number(searchParams.get('page') || 1)
+  const limit = Number(searchParams.get('limit') || 10)
 
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`
+  // hooks
+  const deleteProduct = useDeleteProduct()
+  const createProduct = useCreateProduct()
+  const updateProduct = useUpdateProduct()
+  const productsData = useGetProducts({ page, limit })
+  const products = productsData.data?.data || []
 
-  const getStatusBadge = (status: string) => {
-    return status === 'active' ? (
+  const totalPages = productsData.data?.meta.totalPages || 1
+
+
+  const formatPrice = (price: number | string) => {
+    const numaricPrice = typeof price === 'string' ? parseFloat(price) : price
+    return `${numaricPrice.toFixed(2)}$`
+  }
+
+  const getStatusBadge = (status: boolean) => {
+    return status === true ? (
       <Badge variant="default">Active</Badge>
     ) : (
       <Badge variant="secondary">Inactive</Badge>
@@ -36,12 +57,12 @@ export default function Products() {
 
   const columns: Column<Product>[] = [
     {
-      key: 'primaryImage',
+      key: 'images',
       header: 'Image',
       render: (product) => (
         <div className="w-12 h-12 rounded-md overflow-hidden bg-muted">
           <img 
-            src={product.primaryImage} 
+            src={getImageUrl(product.images[0]?.url)} 
             alt={product.name}
             className="w-full h-full object-cover"
           />
@@ -60,7 +81,13 @@ export default function Products() {
     },
     {
       key: 'category',
-      header: 'Category'
+      header: 'Category',
+      render: (product) => (
+        <div>
+          <div className="font-medium">{product.category.name}</div>
+          <div className="text-sm text-muted-foreground">{product.category.slug}</div>
+        </div>
+      )
     },
     {
       key: 'price',
@@ -80,12 +107,12 @@ export default function Products() {
       render: (product) => getStockBadge(product.stock)
     },
     {
-      key: 'status',
-      header: 'Status',
+      key: 'isActive',
+      header: 'isActive',
       render: (product) => (
         <div className="flex items-center gap-2">
-          {getStatusBadge(product.status)}
-          {product.featured && <Badge variant="outline">Featured</Badge>}
+          {getStatusBadge(product.isActive)}
+          {product.isFeatured && <Badge variant="outline">Featured</Badge>}
         </div>
       )
     },
@@ -95,26 +122,6 @@ export default function Products() {
     }
   ]
 
-  const filters = [
-    {
-      key: 'category' as keyof Product,
-      label: 'Category',
-      options: categories.flatMap(cat => 
-        cat.children ? cat.children.map(child => ({ 
-          label: child.name, 
-          value: child.name 
-        })) : [{ label: cat.name, value: cat.name }]
-      )
-    },
-    {
-      key: 'status' as keyof Product,
-      label: 'Status',
-      options: [
-        { label: 'Active', value: 'active' },
-        { label: 'Inactive', value: 'inactive' }
-      ]
-    }
-  ]
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product)
@@ -122,29 +129,25 @@ export default function Products() {
   }
 
   const handleDelete = (product: Product) => {
-    setProducts(prev => prev.filter(p => p.id !== product.id))
-    toast({
-      title: "Product deleted",
-      description: `${product.name} has been deleted successfully.`
-    })
+    deleteProduct.mutate(product.id)
   }
 
   const handleBulkDelete = (selectedProducts: Product[]) => {
     const selectedIds = selectedProducts.map(p => p.id)
-    setProducts(prev => prev.filter(p => !selectedIds.includes(p.id)))
-    toast({
-      title: "Products deleted",
-      description: `${selectedProducts.length} products have been deleted.`
-    })
+    // setProducts(prev => prev.filter(p => !selectedIds.includes(p.id)))
+    // toast({
+    //   title: "Products deleted",
+    //   description: `${selectedProducts.length} products have been deleted.`
+    // })
   }
 
   const handleBulkAction = (action: string, selectedProducts: Product[]) => {
     const selectedIds = selectedProducts.map(p => p.id)
     
     if (action === 'activate') {
-      setProducts(prev => prev.map(p => 
-        selectedIds.includes(p.id) ? { ...p, status: 'active' as const } : p
-      ))
+      // setProducts(prev => prev.map(p => 
+      //   selectedIds.includes(p.id) ? { ...p, status: 'active' as const } : p
+      // ))
       toast({
         title: "Products activated",
         description: `${selectedProducts.length} products have been activated.`
@@ -154,29 +157,10 @@ export default function Products() {
 
   const handleSaveProduct = (productData: Partial<Product>) => {
     if (editingProduct) {
-      // Update existing product
-      setProducts(prev => prev.map(p => 
-        p.id === editingProduct.id 
-          ? { ...p, ...productData } as Product
-          : p
-      ))
-      toast({
-        title: "Product updated",
-        description: `${productData.name} has been updated successfully.`
-      })
+     updateProduct.mutate({ id: editingProduct.id, data: productData })
     } else {
       // Add new product
-      const newProduct: Product = {
-        id: Math.random().toString(36).substring(7),
-        createdAt: new Date().toISOString().split('T')[0],
-        ...productData
-      } as Product
-      
-      setProducts(prev => [newProduct, ...prev])
-      toast({
-        title: "Product created",
-        description: `${productData.name} has been created successfully.`
-      })
+      createProduct.mutate(productData)
     }
     
     setIsFormOpen(false)
@@ -215,7 +199,7 @@ export default function Products() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
+            <div className="text-2xl font-bold">{products.data?.length}</div>
           </CardContent>
         </Card>
         
@@ -224,9 +208,9 @@ export default function Products() {
             <CardTitle className="text-sm font-medium">Active Products</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {products.filter(p => p.status === 'active').length}
-            </div>
+            {/* <div className="text-2xl font-bold">
+              {products.data?.filter(p => p.status === 'active').length}
+            </div> */}
           </CardContent>
         </Card>
         
@@ -236,7 +220,7 @@ export default function Products() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {products.filter(p => p.stock < 10 && p.stock > 0).length}
+              {products.data?.filter(p => p.stock < 10 && p.stock > 0).length}
             </div>
           </CardContent>
         </Card>
@@ -247,7 +231,7 @@ export default function Products() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {products.filter(p => p.stock === 0).length}
+              {products.data?.filter(p => p.stock === 0).length}
             </div>
           </CardContent>
         </Card>
@@ -263,10 +247,10 @@ export default function Products() {
         </CardHeader>
         <CardContent>
           <DataTable
-            data={products}
+            data={products || []}
             columns={columns}
             searchKey="name"
-            filters={filters}
+            // filters={filters}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onBulkDelete={handleBulkDelete}
@@ -274,6 +258,8 @@ export default function Products() {
           />
         </CardContent>
       </Card>
+
+      <PaginationV1 page={page} totalPages={totalPages} onPageChange={(newPage) => setSearchParams({ page: newPage.toString() })} />
 
       {/* Product Form Modal */}
       <Modal
@@ -283,7 +269,7 @@ export default function Products() {
         description={editingProduct ? 'Update product information' : 'Create a new product for your store'}
         className="max-w-4xl"
       >
-        <ProductForm
+        <EnhancedProductForm
           product={editingProduct}
           onSave={handleSaveProduct}
           onCancel={handleCloseForm}

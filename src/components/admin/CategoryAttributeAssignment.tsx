@@ -5,9 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Attribute, CategoryAttribute, categories } from '@/lib/mockData'
+import { Attribute, CategoryAttribute } from '@/lib/mockData'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { GripVertical, Plus, X } from 'lucide-react'
+import { useGetCategories} from '@/hooks/queries/useCategoryQuery'
 
 interface CategoryAttributeAssignmentProps {
   attributes: Attribute[]
@@ -24,12 +25,14 @@ export function CategoryAttributeAssignment({
 }: CategoryAttributeAssignmentProps) {
   const [assignments, setAssignments] = useState<CategoryAttribute[]>(categoryAttributes)
   const [selectedCategory, setSelectedCategory] = useState<string>('')
+  // hooks
+  const {data: categories = []} = useGetCategories()
+
 
   // Flatten categories for easier access
   const flatCategories = categories.flatMap(cat => 
-    cat.children ? cat.children.map(child => ({ ...child, parentName: cat.name })) : [{ ...cat, parentName: undefined }]
+    cat.children && cat.children.length > 0? cat.children.map(child => ({ ...child, parentName: cat.name })) : [{ ...cat, parentName: undefined }]
   )
-
   useEffect(() => {
     if (flatCategories.length > 0 && !selectedCategory) {
       setSelectedCategory(flatCategories[0].id)
@@ -39,16 +42,17 @@ export function CategoryAttributeAssignment({
   const getCategoryAssignments = (categoryId: string) => {
     return assignments
       .filter(ca => ca.categoryId === categoryId)
-      .sort((a, b) => a.order - b.order)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
   }
+
 
   const addAttributeToCategory = (categoryId: string, attributeId: string) => {
     const existingOrder = getCategoryAssignments(categoryId)
     const newAssignment: CategoryAttribute = {
       categoryId,
       attributeId,
-      required: false,
-      order: existingOrder.length + 1
+      isRequired: false,
+      sortOrder: existingOrder.length + 1
     }
     setAssignments(prev => [...prev, newAssignment])
   }
@@ -62,7 +66,7 @@ export function CategoryAttributeAssignment({
   const toggleRequired = (categoryId: string, attributeId: string) => {
     setAssignments(prev => prev.map(ca => 
       ca.categoryId === categoryId && ca.attributeId === attributeId
-        ? { ...ca, required: !ca.required }
+        ? { ...ca, isRequired: !ca.isRequired }
         : ca
     ))
   }
@@ -172,7 +176,7 @@ export function CategoryAttributeAssignment({
                                         <Badge variant="outline" className="text-xs">
                                           {attribute.type}
                                         </Badge>
-                                        {assignment.required && (
+                                        {assignment.isRequired && (
                                           <Badge variant="destructive" className="text-xs">
                                             Required
                                           </Badge>
@@ -182,7 +186,7 @@ export function CategoryAttributeAssignment({
 
                                     <div className="flex items-center gap-1">
                                       <Switch
-                                        checked={assignment.required}
+                                        checked={assignment.isRequired}
                                         onCheckedChange={() => toggleRequired(category.id, attribute.id)}
                                         title="Required"
                                       />

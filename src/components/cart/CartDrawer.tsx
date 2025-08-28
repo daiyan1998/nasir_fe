@@ -5,48 +5,26 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ShoppingCart, Plus, Minus, X, Trash2 } from 'lucide-react'
+import { useCartStore } from '@/stores/cartStore'
 
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  image: string
-  variant?: string
-}
 
-interface CartDrawerProps {
-  items?: CartItem[]
-  itemCount?: number
-  total?: number
-}
-
-export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerProps) {
+export function CartDrawer() {
   const navigate = useNavigate()
-  const [cartItems, setCartItems] = useState<CartItem[]>(items)
+  const items = useCartStore(state => state.items)
+  const removeItem = useCartStore(state => state.removeItem)
+  const incrementQuantity = useCartStore(state => state.incrementQuantity)
+  const decrementQuantity = useCartStore(state => state.decrementQuantity)
 
   const updateQuantity = (id: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeItem(id)
-      return
-    }
-    
-    setCartItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, quantity } : item
-      )
-    )
   }
 
-  const removeItem = (id: string) => {
-    setCartItems(prev => prev.filter(item => item.id !== id))
-  }
+ 
 
   const calculateTotal = () => {
-    return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    return items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   }
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
   const handleCheckout = () => {
     navigate('/checkout')
@@ -56,7 +34,7 @@ export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerP
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="relative">
-          <ShoppingCart className="h-4 w-4" />
+          <ShoppingCart className="h-4 w-4 text-black" />
           {totalItems > 0 && (
             <Badge 
               variant="destructive" 
@@ -78,33 +56,35 @@ export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerP
         <div className="flex flex-col h-full">
           {/* Cart Items */}
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
-            {cartItems.length === 0 ? (
+            {items.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
                 <ShoppingCart className="h-16 w-16 mb-4 opacity-50" />
                 <p className="text-lg font-medium">Your cart is empty</p>
                 <p className="text-sm">Add some products to get started</p>
               </div>
             ) : (
-              cartItems.map((item) => (
+              items.map((item) => (
                 <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
                   <img 
-                    src={item.image} 
+                    src={item.images[0]} 
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded"
                   />
                   <div className="flex-1 space-y-1">
                     <h4 className="font-medium text-sm line-clamp-2">{item.name}</h4>
-                    {item.variant && (
-                      <p className="text-xs text-muted-foreground">{item.variant}</p>
-                    )}
+                    {/* {item.variants.length > 0 && (
+                      item.variants.map((variant: string) => (
+                        <p key={variant} className="text-xs text-muted-foreground">{variant}</p>
+                      ))
+                    )} */}
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">${item.price.toFixed(2)}</span>
+                      <span className="font-medium">${item.price}</span>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           className="h-6 w-6 p-0"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => decrementQuantity(item.id)}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
@@ -113,7 +93,7 @@ export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerP
                           variant="outline"
                           size="sm"
                           className="h-6 w-6 p-0"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => incrementQuantity(item.id)}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
@@ -134,7 +114,7 @@ export function CartDrawer({ items = [], itemCount = 0, total = 0 }: CartDrawerP
           </div>
 
           {/* Cart Summary */}
-          {cartItems.length > 0 && (
+          {items.length > 0 && (
             <>
               <Separator />
               <div className="space-y-4 py-4">

@@ -1,3 +1,19 @@
+export interface ProductVariant {
+  id: string
+  sku: string
+  price: number
+  salePrice?: number
+  stock: number
+  weight?: number
+  isActive: boolean
+  productId: string
+  attributeValues: {
+    attributeValueId: string
+    attributeName?: string
+    value?: string
+  }[]
+}
+
 export interface Product {
   id: string
   name: string
@@ -17,6 +33,7 @@ export interface Product {
   metaTitle: string
   metaDescription: string
   attributes: Record<string, any>
+  variants?: ProductVariant[]
   createdAt: string
 }
 
@@ -36,10 +53,13 @@ export interface Attribute {
   id: string
   name: string
   slug: string
-  type: 'text' | 'number' | 'select' | 'boolean'
+  type: 'text' | 'number' | 'select' | 'multi_select' | 'boolean' | 'range'
   unit?: string
   isFilterable: boolean
+  required?: boolean
   values?: AttributeValue[]
+  minValue?: number
+  maxValue?: number
   createdAt: string
 }
 
@@ -82,14 +102,90 @@ export const attributes: Attribute[] = [
     isFilterable: true,
     values: [
       { id: 'apple', value: 'Apple', order: 1 },
-      { id: 'samsung', value: 'Samsung', order: 2 }
+      { id: 'samsung', value: 'Samsung', order: 2 },
+      { id: 'sony', value: 'Sony', order: 3 },
+      { id: 'dell', value: 'Dell', order: 4 },
+      { id: 'hp', value: 'HP', order: 5 }
     ],
     createdAt: '2024-01-01'
+  },
+  {
+    id: 'storage',
+    name: 'Storage',
+    slug: 'storage',
+    type: 'select',
+    unit: 'GB',
+    isFilterable: true,
+    values: [
+      { id: '64gb', value: '64', order: 1 },
+      { id: '128gb', value: '128', order: 2 },
+      { id: '256gb', value: '256', order: 3 },
+      { id: '512gb', value: '512', order: 4 },
+      { id: '1tb', value: '1024', order: 5 }
+    ],
+    createdAt: '2024-01-02'
+  },
+  {
+    id: 'screen_size',
+    name: 'Screen Size',
+    slug: 'screen_size',
+    type: 'range',
+    unit: 'inches',
+    isFilterable: true,
+    minValue: 5.0,
+    maxValue: 17.0,
+    createdAt: '2024-01-03'
+  },
+  {
+    id: 'color',
+    name: 'Color',
+    slug: 'color',
+    type: 'multi_select',
+    isFilterable: true,
+    values: [
+      { id: 'black', value: 'Black', order: 1 },
+      { id: 'white', value: 'White', order: 2 },
+      { id: 'blue', value: 'Blue', order: 3 },
+      { id: 'red', value: 'Red', order: 4 },
+      { id: 'gold', value: 'Gold', order: 5 }
+    ],
+    createdAt: '2024-01-04'
+  },
+  {
+    id: 'warranty',
+    name: 'Warranty',
+    slug: 'warranty',
+    type: 'number',
+    unit: 'years',
+    isFilterable: true,
+    createdAt: '2024-01-05'
+  },
+  {
+    id: 'waterproof',
+    name: 'Waterproof',
+    slug: 'waterproof',
+    type: 'boolean',
+    isFilterable: true,
+    createdAt: '2024-01-06'
   }
 ]
 
 export const categoryAttributes: CategoryAttribute[] = [
-  { categoryId: 'smartphones', attributeId: 'brand', required: true, order: 1 }
+  { categoryId: 'smartphones', attributeId: 'brand', required: true, order: 1 },
+  { categoryId: 'smartphones', attributeId: 'storage', required: true, order: 2 },
+  { categoryId: 'smartphones', attributeId: 'screen_size', required: false, order: 3 },
+  { categoryId: 'smartphones', attributeId: 'color', required: false, order: 4 },
+  { categoryId: 'smartphones', attributeId: 'waterproof', required: false, order: 5 },
+  { categoryId: 'laptops', attributeId: 'brand', required: true, order: 1 },
+  { categoryId: 'laptops', attributeId: 'storage', required: true, order: 2 },
+  { categoryId: 'laptops', attributeId: 'screen_size', required: false, order: 3 },
+  { categoryId: 'laptops', attributeId: 'warranty', required: false, order: 4 },
+  { categoryId: 'headphones', attributeId: 'brand', required: true, order: 1 },
+  { categoryId: 'headphones', attributeId: 'color', required: false, order: 2 },
+  { categoryId: 'headphones', attributeId: 'waterproof', required: false, order: 3 },
+  { categoryId: 'smartwatches', attributeId: 'brand', required: true, order: 1 },
+  { categoryId: 'smartwatches', attributeId: 'color', required: false, order: 2 },
+  { categoryId: 'smartwatches', attributeId: 'waterproof', required: true, order: 3 }
 ]
 
 export const products: Product[] = [

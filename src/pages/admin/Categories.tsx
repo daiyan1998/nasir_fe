@@ -8,12 +8,22 @@ import { TreeView } from '@/components/admin/TreeView'
 import { categories as initialCategories, Category } from '@/lib/mockData'
 import { Plus, FolderTree, Eye, EyeOff } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/mutations/useCategoryMutation'
+import { useGetCategories } from '@/hooks/queries/useCategoryQuery'
+import { buildCategoryTree } from '@/utils/buildCategoryTree'
 
 export default function Categories() {
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const { toast } = useToast()
+
+  // hooks
+  const { mutate: createCategory } = useCreateCategory()
+  const {data: categories = [], isLoading} = useGetCategories()
+  const {mutate: deleteCategory} = useDeleteCategory()
+  const {mutate: updateCategory} = useUpdateCategory()
+
+  const nestedCategories = buildCategoryTree(categories)
 
   const flattenCategories = (cats: Category[]): Category[] => {
     const result: Category[] = []
@@ -34,30 +44,18 @@ export default function Categories() {
   const handleEdit = (category: Category) => {
     setEditingCategory(category)
     setIsFormOpen(true)
+    updateCategory(category)
   }
 
   const handleDelete = (categoryId: string) => {
-    const deleteFromTree = (items: Category[]): Category[] => {
-      return items
-        .filter(item => item.id !== categoryId)
-        .map(item => ({
-          ...item,
-          children: item.children ? deleteFromTree(item.children) : undefined
-        }))
-    }
-    
-    setCategories(deleteFromTree(categories))
-    toast({
-      title: "Category deleted",
-      description: "Category has been deleted successfully."
-    })
+    deleteCategory(categoryId)
   }
 
   const handleToggleActive = (categoryId: string) => {
     const updateInTree = (items: Category[]): Category[] => {
       return items.map(item => {
         if (item.id === categoryId) {
-          return { ...item, active: !item.active }
+          return { ...item, active: !item.isActive }
         }
         return {
           ...item,
@@ -66,7 +64,6 @@ export default function Categories() {
       })
     }
     
-    setCategories(updateInTree(categories))
     toast({
       title: "Category updated",
       description: "Category status has been updated."
@@ -74,7 +71,6 @@ export default function Categories() {
   }
 
   const handleReorder = (newOrder: Category[]) => {
-    setCategories(newOrder)
     toast({
       title: "Categories reordered",
       description: "Category order has been updated."
@@ -82,30 +78,15 @@ export default function Categories() {
   }
 
   const handleSaveCategory = (categoryData: Partial<Category>) => {
+    createCategory(categoryData)
     if (editingCategory) {
       // Update existing category
-      const updateInTree = (items: Category[]): Category[] => {
-        return items.map(item => {
-          if (item.id === editingCategory.id) {
-            return { ...item, ...categoryData } as Category
-          }
-          return {
-            ...item,
-            children: item.children ? updateInTree(item.children) : undefined
-          }
-        })
-      }
-      
-      setCategories(updateInTree(categories))
-      toast({
-        title: "Category updated",
-        description: `${categoryData.name} has been updated successfully.`
-      })
+      updateCategory(categoryData)
     } else {
       // Add new category
       const newCategory: Category = {
         id: Math.random().toString(36).substring(7),
-        order: flattenCategories(categories).length + 1,
+        sortOrder: flattenCategories(categories).length + 1,
         active: true,
         ...categoryData
       } as Category
@@ -126,16 +107,9 @@ export default function Categories() {
             }
           })
         }
-        setCategories(addToTree(categories))
       } else {
         // Add as root category
-        setCategories(prev => [...prev, newCategory])
       }
-      
-      toast({
-        title: "Category created",
-        description: `${categoryData.name} has been created successfully.`
-      })
     }
     
     setIsFormOpen(false)
@@ -148,7 +122,7 @@ export default function Categories() {
   }
 
   const totalCategories = flattenCategories(categories).length
-  const activeCategories = flattenCategories(categories).filter(c => c.active).length
+  const activeCategories = flattenCategories(categories).filter(c => c.isActive).length
 
   return (
     <div className="space-y-6">
@@ -212,7 +186,7 @@ export default function Categories() {
         </CardHeader>
         <CardContent>
           <TreeView
-            data={categories}
+            data={nestedCategories}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onToggleActive={handleToggleActive}
