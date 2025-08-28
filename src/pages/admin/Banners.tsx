@@ -495,7 +495,7 @@ export default function BannersPage() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="none">All Categories</SelectItem>
                     {allCategories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
