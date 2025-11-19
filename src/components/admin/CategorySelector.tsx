@@ -15,7 +15,7 @@ export function CategorySelector({ categories, value, onChange, required = false
   const flattenCategories = (cats: Category[], level = 0): Array<Category & { level: number }> => {
     const result: Array<Category & { level: number }> = []
     
-    cats.forEach(cat => {
+    cats?.forEach(cat => {
       result.push({ ...cat, level })
       if (cat.children && cat.children.length > 0) {
         result.push(...flattenCategories(cat.children, level + 1))
@@ -26,6 +26,8 @@ export function CategorySelector({ categories, value, onChange, required = false
   }
 
   const flatCategories = flattenCategories(categories)
+
+  console.log(flatCategories(categories).map(c => c.id))
 
   return (
     <div className="space-y-2">
@@ -38,8 +40,8 @@ export function CategorySelector({ categories, value, onChange, required = false
           <SelectValue placeholder="Select a category" />
         </SelectTrigger>
         <SelectContent>
-          {flatCategories.map((category) => (
-            <SelectItem key={category.id} value={category.id}>
+          {flatCategories?.map((category, index) => (
+            <SelectItem key={`${ category.id }${index}`} value={category.id}>
               <div className="flex items-center">
                 <span style={{ marginLeft: `${category.level * 16}px` }}>
                   {category.level > 0 && '↳ '}

@@ -3,21 +3,13 @@ import { Button } from "@/components/ui/button";
 import ProductCard from "./ProductCard";
 import airpodsImage from "@/assets/airpods-pro.jpg";
 import galaxyWatchImage from "@/assets/galaxy-watch.jpg";
+import { Product } from "@/types/Product.type";
+import ProductCarousal from "./ProductCarousal";
 
 interface ProductSectionProps {
   title: string;
   subtitle?: string;
-  products: Array<{
-    id: string;
-    image: string;
-    title: string;
-    price: string;
-    originalPrice?: string;
-    rating: number;
-    reviews: number;
-    isNew?: boolean;
-    discount?: string;
-  }>;
+  products: Product[];
 }
 
 const ProductSection = ({ title, subtitle, products }: ProductSectionProps) => {
@@ -41,21 +33,16 @@ const ProductSection = ({ title, subtitle, products }: ProductSectionProps) => {
           {subtitle && <p className="text-gray-600 mt-1">{subtitle}</p>}
         </div>
         
-        <div className="flex space-x-2">
+        {/* <div className="flex space-x-2">
           <Button variant="outline" size="sm">
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm">
             <ChevronRight className="h-4 w-4" />
           </Button>
-        </div>
+        </div> */}
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} {...product} />
-        ))}
-      </div>
+      <ProductCarousal products={products}/>
     </section>
   );
 };

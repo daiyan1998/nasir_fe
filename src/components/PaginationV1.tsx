@@ -16,7 +16,7 @@ interface PaginationV1Props {
 export function PaginationV1({page, totalPages, onPageChange} : PaginationV1Props) {
  const pages = Array.from({length: totalPages}, (_ , i) => i + 1)
   return (
-    <Pagination>
+    <Pagination className="mt-8">
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious

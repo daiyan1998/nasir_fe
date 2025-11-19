@@ -12,11 +12,19 @@ interface GetProductsParams {
 
 export const useGetProducts = (params?: GetProductsParams) => {
   return useQuery({
-    queryKey: [queryKeys.products.all, params],
+    queryKey: [...queryKeys.products.all, params],
     queryFn: () => productService.getProducts(params ?? {} ),
     staleTime: 1000 * 60 * 5, // Cache for 5 mins
   });
 };
+
+export const useGetSearchProducts = (query: string) => {
+  return useQuery({
+    queryKey: queryKeys.products.search(query),
+    queryFn: () => productService.searchProducts(query),
+    enabled: !!query,
+  });
+}
 
 export const useGetProductById = (id: string) => {
   return useQuery({

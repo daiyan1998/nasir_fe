@@ -6,7 +6,6 @@ import { DataTable, Column } from '@/components/admin/DataTable'
 import { Modal } from '@/components/ui/modal'
 import { AttributeForm } from '@/components/admin/AttributeForm'
 import { CategoryAttributeAssignment } from '@/components/admin/CategoryAttributeAssignment'
-import { attributes as initialAttributes, Attribute, categoryAttributes as initialCategoryAttributes, CategoryAttribute } from '@/lib/mockData'
 import { Plus, Settings, Filter, Type } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateAttribute, useDeleteAttribute, useImportAttributes } from '@/hooks/mutations/useAttributeMutation'
@@ -14,6 +13,8 @@ import { useGetAttributes } from '@/hooks/queries/useAttributeQuery'
 import { useAssignAttributeToCategory } from '@/hooks/mutations/useCategoryAttributeMutation'
 import { useGetCategoryAttributes } from '@/hooks/queries/useCategoryAttributeQuery'
 import { ImportCSVForm } from '@/components/admin/ImportCSVForm'
+import { Attribute } from '@/types/Attribute.type'
+import { CategoryAttribute } from '@/types/Category.type'
 
 export default function Attributes() {
   // const [attributes, setAttributes] = useState<Attribute[]>(initialAttributes)
@@ -91,14 +92,14 @@ export default function Attributes() {
         </Badge>
       )
     },
-    {
-      key: 'createdAt',
-      header: 'Usage',
-      render: (attribute) => {
-        const usageCount = categoryAttributes.filter(ca => ca.attributeId === attribute.id).length
-        return <span className="text-sm">{usageCount} categories</span>
-      }
-    },
+    // {
+    //   key: 'createdAt',
+    //   header: 'Usage',
+    //   render: (attribute) => {
+    //     const usageCount = categoryAttributes.filter(ca => ca.attributeId === attribute.id).length
+    //     return <span className="text-sm">{usageCount} categories</span>
+    //   }
+    // },
     {
       key: 'actions',
       header: 'Actions'
@@ -156,7 +157,7 @@ export default function Attributes() {
 
   const handleSaveCategoryAttributes = (newCategoryAttributes: CategoryAttribute[]) => {
     const categoryIdAttributes = newCategoryAttributes.map(ca => ({categoryId: ca.categoryId, attributeId: ca.attributeId})).filter(ca => ca.categoryId || ca.attributeId)
-    // assignAttributeToCategory(newCategoryAttributes)
+    assignAttributeToCategory(newCategoryAttributes)
   }
 
   const handleDataImport = (csvData: any[]) => {

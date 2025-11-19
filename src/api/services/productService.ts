@@ -1,6 +1,8 @@
-import { Product } from "@/types/Product.type"
+import { Product, ProductMetaResponse } from "@/types/Product.type"
 import { apiClient } from "../client"
 import { endpoints } from "../endPoints"
+import { ApiResponse } from "@/types/ApiResponse.type";
+
 
 interface ProductListResponse {
   data: Product[]
@@ -16,15 +18,15 @@ export const productService = {
   // ============ READ OPERATIONS ============
   
   // Get all products with optional filters
-  getProducts: async (params = {}) : Promise<any> => {
-    const { data } = await apiClient.get<any>(endpoints.products, { params,
+  getProducts: async (params = {}) : Promise<ApiResponse<Product[], ProductMetaResponse>> => {
+    const { data } = await apiClient.get<ApiResponse<Product[], ProductMetaResponse>>(endpoints.products, { params,
      })
     return data
   },
 
   // Get single product by ID
-  getProductById: async (id) => {
-    const { data } = await apiClient.get(endpoints.productById(id))
+  getProductById: async (id: string): Promise<ApiResponse<Product>> => {
+    const { data } = await apiClient.get<ApiResponse<Product>>(endpoints.productById(id))
     return data
   },
 
@@ -39,8 +41,8 @@ export const productService = {
 
   // Search products
   searchProducts: async (query, params = {}) => {
-    const { data } = await apiClient.get(endpoints.products, {
-      params: { search: query, ...params }
+    const { data } = await apiClient.get(endpoints.productsSearch, {
+      params: { query: query, ...params }
     })
     return data
   },
@@ -95,7 +97,7 @@ export const productService = {
 
   // Update product
   updateProduct: async (productId, productData) => {
-    const { data } = await apiClient.put(endpoints.productById(productId), productData)
+    const { data } = await apiClient.patch(endpoints.productById(productId), productData)
     return data
   },
 

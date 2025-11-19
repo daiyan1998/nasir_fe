@@ -2,11 +2,12 @@
 import { Category, CategoryFilter } from "@/types/Category.type"
 import { apiClient } from "../client"
 import { endpoints } from "../endPoints"
+import { ApiResponse } from "@/types/ApiResponse.type"
 
 export const categoryService = {
   // Get all categories
-  getCategories: async () => {
-    const { data } : { data: Category[] } = await apiClient.get(endpoints.categories)
+  getCategories: async () : Promise<ApiResponse<Category[]>> => {
+    const { data }  = await apiClient.get<ApiResponse<Category[]>>(endpoints.categories)
     return data
   },
 

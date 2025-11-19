@@ -1,9 +1,6 @@
-
-import { useState } from 'react'
-import { Label } from '@/components/ui/label'
-import {  Truck, CreditCard, Wallet, MapPin, Phone, User } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { CartItem as OrderItem } from '@/types/Cart.type'
+import { Label } from "@/components/ui/label";
+import { Truck, CreditCard, Wallet, MapPin, Phone, User } from "lucide-react";
+import { CartItem as OrderItem } from "@/types/Cart.type";
 import {
   Form,
   FormControl,
@@ -11,121 +8,138 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import z from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useCreateOrder } from '@/hooks/mutations/useOrderMutation'
-import { useCartStore } from '@/stores/cartStore'
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCreateOrder } from "@/hooks/mutations/useOrderMutation";
+import { useGetProfile } from "@/hooks/queries/useProfileQuery";
+import { useEffect } from "react";
+import { IMG_URL } from "@/utils/constants";
 
 interface PaymentMethod {
-  id: string
-  name: string
-  description: string
-  icon: React.ReactNode
-  enabled: boolean
-  comingSoon?: boolean
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  enabled: boolean;
+  comingSoon?: boolean;
 }
 
-
-
 interface PaymentFormProps {
-  items: OrderItem[]
-  subtotal: number
-  total: number
+  items: OrderItem[];
+  subtotal: number;
+  total: number;
 }
 
 const checkoutSchema = z.object({
+  userId: z.string().optional(),
   fullName: z.string().min(2, "Full name is required"),
   phone: z.string().min(6, "Phone number is required"),
+  email: z.string().email("Invalid email address"),
   address: z.string().min(5, "Street address is required"),
   city: z.string().min(2, "City is required"),
-  state: z.string().optional(),
+  // state: z.string().optional(),
   zipCode: z.string().optional(),
   notes: z.string().optional(),
   payment: z.string().min(1, "Select a payment method"),
-})
+});
 
 export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
-  const products = items.map(item => item.id)
-  
-  
-  // hooks
-  const { mutate: createOrder, isPending: isCreatingOrder } = useCreateOrder()
+  const products = items.map((item) => item.id);
+  const { data: user } = useGetProfile();
 
-    const form = useForm<z.infer<typeof checkoutSchema>>({
+  const sanitizedItems = items.map((item) => ({
+    selectedOptions: item.selectedOptions,
+    productId: item.id,
+    quantity: item.quantity,
+  }));
+
+  // hooks
+  const { mutate: createOrder, isPending: isCreatingOrder } = useCreateOrder();
+
+  const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
+      userId: user?.data?.id,
       fullName: "",
       phone: "",
+      email: "",
       address: "",
       city: "",
-      state: "",
+      // state: "",
       zipCode: "",
       notes: "",
       payment: "",
     },
-  })
-  
+  });
 
+  useEffect(() => {
+    if (user) {
+      form.setValue("userId", user.data.id);
+      form.setValue("email", user.data.email);
+      form.setValue("fullName", user.data.fullName);
+    }
+  }, [user, form]);
 
   const paymentMethods: PaymentMethod[] = [
     {
-      id: 'cod',
-      name: 'Cash on Delivery',
-      description: 'Pay when your order is delivered to your doorstep',
+      id: "cod",
+      name: "Cash on Delivery",
+      description: "Pay when your order is delivered to your doorstep",
       icon: <Truck className="h-5 w-5" />,
-      enabled: true
+      enabled: true,
     },
-    {
-      id: 'card',
-      name: 'Credit/Debit Card',
-      description: 'Pay securely with your card',
-      icon: <CreditCard className="h-5 w-5" />,
-      enabled: false,
-      comingSoon: true
-    },
-    {
-      id: 'wallet',
-      name: 'Digital Wallet',
-      description: 'PayPal, Apple Pay, Google Pay',
-      icon: <Wallet className="h-5 w-5" />,
-      enabled: false,
-      comingSoon: true
-    }
-  ]
-
-  
-
- 
+    // {
+    //   id: 'card',
+    //   name: 'Credit/Debit Card',
+    //   description: 'Pay securely with your card',
+    //   icon: <CreditCard className="h-5 w-5" />,
+    //   enabled: false,
+    //   comingSoon: true
+    // },
+    // {
+    //   id: 'wallet',
+    //   name: 'Digital Wallet',
+    //   description: 'PayPal, Apple Pay, Google Pay',
+    //   icon: <Wallet className="h-5 w-5" />,
+    //   enabled: false,
+    //   comingSoon: true
+    // }
+  ];
 
   function handlePlaceOrder(values: z.infer<typeof checkoutSchema>) {
     createOrder({
-      items: items,
-      total: total,
+      userId: values.userId,
+      items: sanitizedItems,
       paymentMethod: values.payment,
-      shippingAddress: values,
-    })
-    
+      shippingAddress: {
+        fullName: values.fullName,
+        phone: values.phone,
+        email: values.email,
+        address: values.address,
+        city: values.city,
+        zipCode: values.zipCode,
+        notes: values.notes,
+      },
+    });
   }
 
-
   return (
-     <Form {...form}>
+    <Form {...form}>
       <form onSubmit={form.handleSubmit(handlePlaceOrder)}>
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Order Summary */}
@@ -138,7 +152,7 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                 {items.map((item: any) => (
                   <div key={item.id} className="flex items-center gap-3">
                     <img
-                      src={item.images?.[0] || ""}
+                      src={`${IMG_URL}${ item.images?.[0] }` || ""}
                       alt={item.name}
                       className="w-12 h-12 object-cover rounded-md"
                     />
@@ -149,7 +163,7 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                       </p>
                     </div>
                     <span className="font-medium">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ৳ {(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -159,12 +173,12 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>৳ {subtotal.toFixed(2)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>৳ {total.toFixed(2)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -206,10 +220,21 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                       <FormItem>
                         <FormLabel>Phone Number *</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="+1 (555) 123-4567"
-                            {...field}
-                          />
+                          <Input placeholder="+1 (555) 123-4567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="3ePdD@example.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -242,13 +267,13 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                       <FormItem>
                         <FormLabel>City *</FormLabel>
                         <FormControl>
-                          <Input placeholder="New York" {...field} />
+                          <Input placeholder="Dhaka" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="state"
                     render={({ field }) => (
@@ -260,7 +285,7 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
                   <FormField
                     control={form.control}
                     name="zipCode"
@@ -268,7 +293,7 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                       <FormItem>
                         <FormLabel>ZIP Code</FormLabel>
                         <FormControl>
-                          <Input placeholder="10001" {...field} />
+                          <Input placeholder="1205" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -379,7 +404,7 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                         <p className="text-sm text-muted-foreground mt-1">
                           You'll pay in cash when your order is delivered.
                           Please have the exact amount ready:{" "}
-                          <strong>${total.toFixed(2)}</strong>
+                          <strong>৳ {total.toFixed(2)}</strong>
                         </p>
                       </div>
                     </div>
@@ -394,11 +419,12 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
               type="submit"
               className="w-full bg-brand-orange hover:bg-brand-orange/90"
             >
-              Place Order - ${total.toFixed(2)}
+              {isCreatingOrder ? "Placing order..." : `Place Order - ৳ ${total.toFixed(2)}`}
+              
             </Button>
           </div>
         </div>
       </form>
     </Form>
-  )
+  );
 }

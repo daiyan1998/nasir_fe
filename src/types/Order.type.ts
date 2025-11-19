@@ -1,8 +1,9 @@
+import { ApiResponse } from "./ApiResponse.type";
 import { Product } from "./Product.type";
 
 export interface ShippingAddress {
   id: string;
-  type: 'HOME' | 'WORK' | 'OTHER'; // match your AddressType enum in Prisma
+  type: "HOME" | "WORK" | "OTHER"; // match your AddressType enum in Prisma
   fullName: string;
   company?: string | null;
   email?: string | null;
@@ -24,14 +25,15 @@ export interface OrderItem {
   orderId: string;
   productId: string;
   variantId?: string | null;
-  product: Product
+  product: Product;
+  selectedOptions?: any
 }
 
 export interface Order {
   id: string;
   orderNumber: string;
-  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'; // match backend enum
-  paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED'; // 
+  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED"; // match backend enum
+  paymentStatus: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED"; //
   totalAmount: string;
   shippingCost: string;
   taxAmount: string;
@@ -47,7 +49,30 @@ export interface Order {
 }
 
 // Response from backend
-export interface OrderResponse {
-  data: Order;
+
+export interface OrdersMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  pendingOrders: number;
+  completedOrders: number;
+  averageOrderValue: number;
+  totalRevenue: number;
+}
+
+export interface OrderResponse<T, M = undefined> {
+  data: T;
+  // meta?: {
+  //   total: number;
+  //   page: number;
+  //   limit: number;
+  //   totalPages: number;
+  //   pendingOrders: number;
+  //   completedOrders: number;
+  //   averageOrderValue: number;
+  //   totalRevenue: number;
+  // };
+  meta?: M;
 }
 

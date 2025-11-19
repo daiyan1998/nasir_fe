@@ -630,21 +630,23 @@ export default function SettingsPage() {
                   <div className="space-y-2">
                     <Label>Logo</Label>
                     <p className="text-sm text-muted-foreground">Upload your store logo (recommended: 200x50px)</p>
-                    <ImageUploader
+                    {/* TODO : Fix Image Uploader */}
+                    {/* <ImageUploader
                       images={logoImages}
                       onImagesChange={setLogoImages}
                       maxImages={1}
-                    />
+                    /> */}
                   </div>
 
                   <div className="space-y-2">
                     <Label>Favicon</Label>
                     <p className="text-sm text-muted-foreground">Upload your favicon (recommended: 32x32px)</p>
-                    <ImageUploader
+                    {/* TODO : Fix Image Uploader */}
+                    {/* <ImageUploader
                       images={faviconImages}
                       onImagesChange={setFaviconImages}
                       maxImages={1}
-                    />
+                    /> */}
                   </div>
                 </div>
               </div>

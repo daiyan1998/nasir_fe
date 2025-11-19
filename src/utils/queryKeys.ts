@@ -3,12 +3,14 @@
     all: ['products'] as const,
     list: (filters?: unknown) => ['products', 'list', filters] as const,
     detail: (id: string) => ['products', 'detail', id] as const,
+    category: (category: string) => ['products', 'category', category] as const,
+    search: (query: string) => ['products', 'search', query] as const
   },
   categories: {
     all: ['categories'] as const,
     list: () => ['categories', 'list'] as const,
     detail: (id: string) => ['categories', 'detail', id] as const,
-    filter:(slug:string) => ['categoryFilter'] as const
+    filter:(slug:string) => ['categoryFilter',slug] as const
   },
   attributes: {
     all: ['attributes'] as const,
@@ -28,9 +30,20 @@
     list: (filters?: unknown) => ['orders', 'list', filters] as const,
     detail: (id: string) => ['orders', 'detail', id] as const,
   },
-  user: {
+  users: {
     all: ['user'] as const,
+    list: () => ['user', 'list'] as const,
+    detail: (id: string) => ['user', 'detail', id] as const,
     profile: () => ['user', 'profile'] as const,
     wishlist: () => ['user', 'wishlist'] as const,
   },
+  profile: {
+    all: ['profile'] as const,
+    me: () => ['profile', 'me'] as const,
+  },
+  tag: {
+    all: ['tag'] as const,
+    list: () => ['tag', 'list'] as const
+  }
+
 };

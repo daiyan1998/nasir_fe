@@ -63,3 +63,22 @@ export const useDeleteProduct = () => {
     },
   });
 };
+
+export const useDeleteProductImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { productId: string; imageId: string }) => productService.deleteProductImage(data.productId, data.imageId),
+    onSuccess: (_, { productId: id }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(id) });
+      toast({ title: "Image deleted", description: "Image has been deleted successfully." });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error deleting image",
+        description: error?.response?.data?.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    },
+  })
+}

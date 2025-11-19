@@ -6,8 +6,9 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Attribute, AttributeValue } from '@/lib/mockData'
+// import { Attribute, AttributeValue } from '@/lib/mockData'
 import { Plus, X, GripVertical } from 'lucide-react'
+import { Attribute, AttributeValue } from '@/types/Attribute.type'
 
 interface AttributeFormProps {
   attribute?: Attribute | null
@@ -25,8 +26,8 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
     isFilterable: true,
     // required: false,
     attributeValues: [] as AttributeValue[],
-    minValue: 0,
-    maxValue: 100
+    // minValue: 0,
+    // maxValue: 100
   })
 
   useEffect(() => {
@@ -39,8 +40,8 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
         isFilterable: attribute.isFilterable,
         // required: attribute.required || false,
         attributeValues: attribute.attributeValues || [],
-        minValue: attribute.minValue || 0,
-        maxValue: attribute.maxValue || 100
+        // minValue: attribute.minValue || 0,
+        // maxValue: attribute.maxValue || 100
       })
     }
   }, [attribute])
@@ -72,7 +73,7 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
     const newValue: AttributeValue = {
       id: Math.random().toString(36).substring(7),
       value: '',
-      order: formData.attributeValues.length + 1
+      // order: formData.attributeValues.length + 1
     }
     setFormData(prev => ({
       ...prev,
@@ -104,18 +105,17 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
     }
     
     // Validate range type has min/max values
-    if (formData.type === 'RANGE' && (formData.minValue >= formData.maxValue)) {
-      alert('Range type attributes must have valid min and max values')
-      return
-    }
+    // if (formData.type === 'RANGE' && (formData.minValue >= formData.maxValue)) {
+    //   alert('Range type attributes must have valid min and max values')
+    //   return
+    // }
     
     const dataToSave = {
       ...formData,
       attributeValues: (formData.type === 'SELECT' || formData.type === 'MULTI_SELECT') ? formData.attributeValues : undefined,
-      minValue: formData.type === 'RANGE' ? formData.minValue : undefined,
-      maxValue: formData.type === 'RANGE' ? formData.maxValue : undefined
+      // minValue: formData.type === 'RANGE' ? formData.minValue : undefined,
+      // maxValue: formData.type === 'RANGE' ? formData.maxValue : undefined
     }
-    
     onSave(dataToSave)
   }
 
@@ -218,7 +218,7 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
       </div>
 
       {/* Range Values */}
-      {formData.type === 'RANGE' && (
+      {/* {formData.type === 'RANGE' && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Range Configuration</h3>
           
@@ -246,7 +246,7 @@ export function AttributeForm({ attribute, onSave, onCancel }: AttributeFormProp
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Select/Multi-Select Values */}
       {(formData.type === 'SELECT' || formData.type === 'MULTI_SELECT') && (

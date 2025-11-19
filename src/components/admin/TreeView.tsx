@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Category } from '@/lib/mockData'
 import { ChevronRight, ChevronDown, Edit, Trash2, Eye, EyeOff, FolderOpen, Folder, Plus } from 'lucide-react'
+import { Category } from '@/types/Category.type'
 
 interface TreeViewProps {
   data: Category[]

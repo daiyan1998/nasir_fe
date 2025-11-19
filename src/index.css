@@ -120,3 +120,40 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+}
+
+.prose table td,
+.prose table th {
+  border: 1px solid hsl(var(--border));
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+.prose table th {
+  background-color: hsl(var(--muted));
+  font-weight: 600;
+}
+
+/* Slightly rounded table look (Notion-like) */
+.prose table {
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+/* Remove strong thick borders from default browser styles */
+.prose table {
+  border-spacing: 0;
+}
+
+/* Highlight selected cell (TipTap) */
+.selectedCell {
+  background-color: hsl(var(--accent) / 0.15);
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: -1px;
+}
+

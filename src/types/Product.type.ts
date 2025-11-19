@@ -1,11 +1,15 @@
 import { AttributeValue } from "./Attribute.type";
 import { Category } from "./Category.type";
+import { Tag } from "./Tag.type";
+
 
 export interface Product {
   id: string;
   name: string;
   slug: string;
   description?: string;
+  specifications?: string;
+  tags?: Tag[];
   shortDesc?: string;
   sku: string;
   price: number;
@@ -100,4 +104,10 @@ export interface ProductVariantAttributeValue {
   attributeValue?: AttributeValue;
 }
 
+export interface ProductMetaResponse {
+  total: number;
+  skip: number;
+  limit: number;
+  totalPages: number;
+}
 

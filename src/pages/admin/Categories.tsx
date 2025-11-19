@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/badge'
 import { Modal } from '@/components/ui/modal'
 import { CategoryForm } from '@/components/admin/CategoryForm'
 import { TreeView } from '@/components/admin/TreeView'
-import { categories as initialCategories, Category } from '@/lib/mockData'
 import { Plus, FolderTree, Eye, EyeOff } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/mutations/useCategoryMutation'
 import { useGetCategories } from '@/hooks/queries/useCategoryQuery'
 import { buildCategoryTree } from '@/utils/buildCategoryTree'
+import { Category } from '@/types/Category.type'
 
 export default function Categories() {
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -19,11 +19,14 @@ export default function Categories() {
 
   // hooks
   const { mutate: createCategory } = useCreateCategory()
-  const {data: categories = [], isLoading} = useGetCategories()
+  const {data: categoryData, isLoading : categoriesLoading} = useGetCategories()
+  const categories = categoryData?.data
   const {mutate: deleteCategory} = useDeleteCategory()
   const {mutate: updateCategory} = useUpdateCategory()
 
   const nestedCategories = buildCategoryTree(categories)
+  console.log('categories',categories)
+  console.log(nestedCategories)
 
   const flattenCategories = (cats: Category[]): Category[] => {
     const result: Category[] = []
@@ -75,6 +78,10 @@ export default function Categories() {
       title: "Categories reordered",
       description: "Category order has been updated."
     })
+  }
+
+  if(categoriesLoading) {
+    return <div>Loading...</div>
   }
 
   const handleSaveCategory = (categoryData: Partial<Category>) => {

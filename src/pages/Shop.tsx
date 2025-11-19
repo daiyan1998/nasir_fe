@@ -11,22 +11,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Grid3x3,
-  List,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Grid3x3, List } from "lucide-react";
 import galaxyTabImage from "@/assets/galaxy-watch.jpg";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useGetProducts } from "@/hooks/queries/useProductQuery";
 import { useGetCategoryFilter } from "@/hooks/queries/useCategoryQuery";
-import { CategoryFilter } from "@/types/Category.type";
-import { Accordion, AccordionItem, AccordionContent, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionContent,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import ProductCard from "@/components/ProductCard";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
+import { PaginationV1 } from "@/components/PaginationV1";
+import { Product } from "@/types/Product.type";
+import { PriceRangeSlider } from "@/components/PriceRangeSlider";
 
 const Shop = () => {
   const { categorySlug } = useParams();
@@ -34,21 +36,35 @@ const Shop = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("popularity");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get("page") || 1);
+  const limit = Number(searchParams.get("limit") || 10);
   // hooks
-  const {data:getProducts, isLoading: isLoadingProducts} = useGetProducts({
+  const { data: productsData, isLoading: isLoadingProducts } = useGetProducts({
     filters: {
       categorySlug,
       attributes: selectedFilters,
     },
+    page,
+    limit,
   });
+  const totalPages = productsData?.meta?.totalPages || 1;
 
   const { data: getCategoryFilter, isLoading: isLoadingCategoryFilter } =
     useGetCategoryFilter(categorySlug);
 
-  const categoryFilters = getCategoryFilter?.categoryFilters ?? [];
+  const categoryFilters = getCategoryFilter?.categoryFilters ?? null;
 
-  const products = getProducts?.data ?? [];
+  const products = productsData?.data ?? null;
 
+  useEffect(() => {
+    // When category changes, clear all selected filters
+    setSelectedFilters([]);
+  }, [categorySlug]);
+
+  const handlePriceChange = (value) => {
+    setPriceRange(value);
+  }
 
   const handleFilterChange = (
     attributeName: string,
@@ -72,7 +88,7 @@ const Shop = () => {
       <Header />
 
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
+      {/* <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
@@ -98,26 +114,33 @@ const Shop = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <div className="lg:w-1/4 border-2 rounded-md h-full">
-            <div className="p-4 text-lg font-semibold border-b-2">
-              Filters
-            </div>
+            <div className="p-4 text-lg font-semibold border-b-2">Filters</div>
             <Accordion type="single" collapsible>
               {isLoadingCategoryFilter ? (
                 <div>Loading...</div>
               ) : (
-                categoryFilters.map((categoryFilter) => (
+                categoryFilters?.length === 0 && (
+                  <div className="p-4">No filters available</div>
+                )
+              )}
+              {isLoadingCategoryFilter ? (
+                <div>Loading...</div>
+              ) : (
+                categoryFilters?.map((categoryFilter) => (
                   <AccordionItem
                     key={categoryFilter.id}
                     value={categoryFilter.name}
                     className=""
                   >
-                    <AccordionTrigger className="px-2">{categoryFilter.name}</AccordionTrigger>
+                    <AccordionTrigger className="px-2">
+                      {categoryFilter.name}
+                    </AccordionTrigger>
                     {categoryFilter.attribute?.attributeValues?.map(
                       (filter) => (
                         <AccordionContent key={filter.id} className="px-2">
@@ -128,9 +151,9 @@ const Shop = () => {
                             <Checkbox
                               id={filter.value}
                               checked={
-                                selectedFilters[categoryFilter.attribute.name]?.includes(
-                                  filter.value
-                                ) || false
+                                selectedFilters[
+                                  categoryFilter.attribute.name
+                                ]?.includes(filter.value) || false
                               }
                               onCheckedChange={(checked) =>
                                 handleFilterChange(
@@ -147,6 +170,11 @@ const Shop = () => {
                         </AccordionContent>
                       )
                     )}
+                    <AccordionContent className="px-2">
+                      {categoryFilter.type === "PRICE_RANGE" && (
+                        <PriceRangeSlider setPriceRange = {setPriceRange} />
+                      )}
+                    </AccordionContent>
                   </AccordionItem>
                 ))
               )}
@@ -158,9 +186,9 @@ const Shop = () => {
             {/* Header Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Samsung</h2>
+                {/* <h2 className="text-2xl font-bold">Samsung</h2> */}
                 <p className="text-muted-foreground">
-                  Showing {products.length} results
+                  Showing {products?.length} results
                 </p>
               </div>
 
@@ -212,81 +240,49 @@ const Shop = () => {
               }`}
             >
               {isLoadingProducts ? (
-                [1, 2, 3, 4,].map((index) => (
-                  <ProductCardSkeleton key={index} />
-                ))
-              ) : products.length === 0 ? (
+                [1, 2, 3, 4].map((index) => <ProductCardSkeleton key={index} />)
+              ) : products?.length === 0 ? (
                 <div>No products found.</div>
-              ) : 
-              products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-              
+              ) : (
+                products?.map((product: Product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              )}
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center mt-12 space-x-2">
-              <Button variant="outline" size="sm">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-brand-orange text-white"
-              >
-                1
-              </Button>
-              <Button variant="outline" size="sm">
-                2
-              </Button>
-              <Button variant="outline" size="sm">
-                3
-              </Button>
-              <span className="px-2">...</span>
-              <Button variant="outline" size="sm">
-                8
-              </Button>
-              <Button variant="outline" size="sm">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            <PaginationV1 totalPages={totalPages} page={page} />
           </div>
         </div>
 
         {/* Product Information Section */}
-        <div className="mt-16">
+        {/* <div className="mt-16">
           <Card>
             <CardContent className="p-8">
               <h2 className="text-2xl font-bold mb-6">
-                Samsung Tablet Price in Bangladesh
+                Product Information Title
               </h2>
 
               <div className="prose max-w-none">
                 <p className="text-muted-foreground mb-4">
-                  Samsung tablets are in big demand in Bangladesh. A full market
-                  research shows that a main part of the people in Bangladesh
-                  use Samsung tablets more than they use phones. Some models
-                  have made Samsung tablets still more comfortable for people,
-                  and due to their affordability and reliability.
+                  This section provides a general overview of the selected
+                  product. You can include information about its popularity,
+                  purpose, or notable features here.
                 </p>
 
                 <h3 className="text-xl font-semibold mt-8 mb-4">
-                  Why Samsung Tabs Are a Smart Pick in Bangladesh
+                  Why This Product Stands Out
                 </h3>
 
                 <p className="text-muted-foreground mb-4">
-                  Quality with a wide reputation. A top tablet brand offered to
-                  quality and user-friendly devices. The Galaxy Tab series in
-                  more cheap ranges. Premium Range as well as mid range galaxy
-                  tab, all the options in the Samsung tablet collection are
-                  provided to match your requirements and budget. Most people in
-                  Bangladesh are big fans of Samsung devices because of the
-                  reliable performance, vibrant displays, and an extensive
-                  digital ecosystem.
+                  Highlight the reasons this product is a great choice. Mention
+                  key benefits, performance details, and what makes it appealing
+                  to users. Adjust this text to fit your specific category or
+                  brand.
                 </p>
 
                 <h3 className="text-xl font-semibold mt-8 mb-4">
-                  Samsung Tab Price in Bangladesh - Price Range by Category
+                  Price Range by Category
                 </h3>
 
                 <div className="grid md:grid-cols-3 gap-6 mt-6">
@@ -296,33 +292,37 @@ const Shop = () => {
                       ৳15,000 - ৳35,000
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Galaxy Tab A series, perfect for basic tasks and
-                      entertainment
+                      Entry-level models offering essential features for
+                      everyday use.
                     </p>
                   </div>
+
                   <div className="border rounded-lg p-4">
                     <h4 className="font-semibold">Mid Range</h4>
                     <p className="text-brand-orange font-bold">
                       ৳35,000 - ৳70,000
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Galaxy Tab S FE series, balanced performance and features
+                      Balanced options providing good performance and modern
+                      features.
                     </p>
                   </div>
+
                   <div className="border rounded-lg p-4">
                     <h4 className="font-semibold">Premium Range</h4>
                     <p className="text-brand-orange font-bold">
                       ৳70,000 - ৳150,000
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Galaxy Tab S series, flagship features and premium build
+                      High-end products designed for power users and
+                      professionals.
                     </p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
 
       <Footer />

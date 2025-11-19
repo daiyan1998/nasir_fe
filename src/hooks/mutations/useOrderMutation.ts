@@ -26,3 +26,33 @@ export const useCreateOrder = () => {
     });
 
 }
+
+export const useTrackOrder = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: any) => orderService.trackOrder(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+            toast({
+                title: "Order tracked successfully",
+                description: "The order has been tracked successfully",
+            })
+        },
+    });
+}
+
+export const useUpdateOrderStatus = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: { id: string, status: string }) => orderService.updateOrderStatus(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+            toast({
+                title: "Order updated successfully",
+                description: "The order has been updated successfully",
+            })
+        },
+    });
+}

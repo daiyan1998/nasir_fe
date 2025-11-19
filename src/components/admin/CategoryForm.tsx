@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageUploader } from './ImageUploader'
-import { Category } from '@/lib/mockData'
+import { Category } from '@/types/Category.type'
 
 interface CategoryFormProps {
   category?: Category | null
@@ -43,7 +43,7 @@ export function CategoryForm({ category, categories, onSave, onCancel }: Categor
         description: category.description || '',
         parentId: category.parentId || null,
         image: category.image || '',
-        isActive: category.active
+        isActive: category.isActive
       })
     }
   }, [category])

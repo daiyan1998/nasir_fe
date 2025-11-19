@@ -1,10 +1,12 @@
-import { categoryAttributes } from "@/lib/mockData";
+import { categoryAttributes, users } from "@/lib/mockData";
 
 export const endpoints = {
   // Products
   products: '/products',
   productById: (id: string) => `/products/${id}`,
   productsByCategory: (categoryId: string) => `/products/category/${categoryId}`,
+  productsImages: ({ productId,imageId }: { productId: string, imageId: string }) => `/products/${productId}/images/${ imageId }`,
+  productsSearch: `/products/search`,
   
   // Categories
   categories: '/categories',
@@ -28,15 +30,32 @@ export const endpoints = {
   // Orders
   orders: '/orders',
   orderById: (id: string) => `/orders/${id}`,
+  orderStatus: (id: string) => `/orders/${id}/status`,
+  orderTracking: `/orders/track`,
   
   // User
-  user: '/user/profile',
-  userOrders: '/user/orders',
-  userWishlist: '/user/wishlist',
+  users: '/users',
+  usersById: (id: string) => `/users/${id}`,
+  usersMe: '/users/me',
+  userOrders: '/users/orders',
+  userWishlist: '/users/wishlist',
+  passwordChange: '/users/me/password',
+
+  // profile
+  profile: '/profile/me',
+  profilePasswordChange: '/profile/me/password',
+
   
   // Auth
   login: '/auth/login',
   register: '/auth/register',
   refreshToken: '/auth/refresh',
   logout: '/auth/logout',
+
+  // Upload
+  uploadImages: '/upload/images',
+
+  // Tags
+  tags: '/tags',
+  tagById: (id: string) => `/tags/${id}`
 }

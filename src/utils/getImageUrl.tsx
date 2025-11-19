@@ -1,3 +1,3 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_IMG_URL = import.meta.env.VITE_IMG_URL || 'http://localhost:3000';
 
-export const getImageUrl = (path?: string) => path ? `${API_BASE_URL}${path}` : '/placeholder.png';
+export const getImageUrl = (path?: string) => path ? `${API_IMG_URL}${path}` : '/placeholder.png';

@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Button } from '@/components/ui/button'
+import { TableKit } from '@tiptap/extension-table'
 import { 
   Bold, 
   Italic, 
@@ -10,7 +11,16 @@ import {
   Undo,
   Redo
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { cn } from '@/lib/utils'
+import { Table, Columns, Rows, Trash } from "lucide-react"
 
 interface RichTextEditorProps {
   content: string
@@ -26,7 +36,12 @@ export function RichTextEditor({
   className 
 }: RichTextEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      TableKit.configure({
+        table: { resizable: true },
+      }),
+    ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
@@ -121,6 +136,7 @@ export function RichTextEditor({
         >
           <Redo className="h-4 w-4" />
         </MenuButton>
+      <TableDropdown editor={editor} />
       </div>
 
       {/* Editor */}
@@ -130,5 +146,98 @@ export function RichTextEditor({
         placeholder={placeholder}
       />
     </div>
+  )
+}
+
+function TableDropdown({ editor }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+        >
+          <Table className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="start" className="w-48">
+        <DropdownMenuLabel>Table</DropdownMenuLabel>
+
+        <DropdownMenuItem
+          onClick={() =>
+            editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+          }
+        >
+          <Table className="w-4 h-4 mr-2" />
+          Insert table
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuLabel>Rows</DropdownMenuLabel>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().addRowBefore().run()}>
+          <Rows className="w-4 h-4 mr-2" />
+          Add row before
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().addRowAfter().run()}>
+          <Rows className="w-4 h-4 mr-2" />
+          Add row after
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().deleteRow().run()}>
+          <Trash className="w-4 h-4 mr-2" />
+          Delete row
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuLabel>Columns</DropdownMenuLabel>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().addColumnBefore().run()}>
+          <Columns className="w-4 h-4 mr-2" />
+          Add column before
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().addColumnAfter().run()}>
+          <Columns className="w-4 h-4 mr-2" />
+          Add column after
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().deleteColumn().run()}>
+          <Trash className="w-4 h-4 mr-2" />
+          Delete column
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuLabel>Advanced</DropdownMenuLabel>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().mergeCells().run()}>
+          Merge cells
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().splitCell().run()}>
+          Split cell
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeaderRow().run()}>
+          Toggle header row
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeaderColumn().run()}>
+          Toggle header column
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => editor.chain().focus().deleteTable().run()}>
+          <Trash className="w-4 h-4 mr-2" />
+          Delete table
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

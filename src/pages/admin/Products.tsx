@@ -14,6 +14,7 @@ import { Product } from '@/types/Product.type'
 import { getImageUrl } from '@/utils/getImageUrl'
 import { PaginationV1 } from '@/components/PaginationV1'
 import {useSearchParams} from 'react-router-dom';
+import { DataTableSkeleton } from '@/components/admin/DataTableSkeleton'
 
 export default function Products() {
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -28,7 +29,7 @@ export default function Products() {
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
   const productsData = useGetProducts({ page, limit })
-  const products = productsData.data?.data || []
+  const products = productsData.data?.data
 
   const totalPages = productsData.data?.meta.totalPages || 1
 
@@ -163,7 +164,7 @@ export default function Products() {
       createProduct.mutate(productData)
     }
     
-    setIsFormOpen(false)
+    // setIsFormOpen(false)
     setEditingProduct(null)
   }
 
@@ -199,7 +200,7 @@ export default function Products() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{products.data?.length}</div>
+            <div className="text-2xl font-bold">{products?.length}</div>
           </CardContent>
         </Card>
         
@@ -220,7 +221,7 @@ export default function Products() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {products.data?.filter(p => p.stock < 10 && p.stock > 0).length}
+              {products?.filter(p => p.stock < 10 && p.stock > 0).length}
             </div>
           </CardContent>
         </Card>
@@ -231,7 +232,7 @@ export default function Products() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {products.data?.filter(p => p.stock === 0).length}
+              {products?.filter(p => p.stock === 0).length}
             </div>
           </CardContent>
         </Card>
@@ -246,6 +247,9 @@ export default function Products() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {productsData.isLoading ? (
+            <DataTableSkeleton columns={columns.length} />
+          ) : (
           <DataTable
             data={products || []}
             columns={columns}
@@ -256,6 +260,7 @@ export default function Products() {
             onBulkDelete={handleBulkDelete}
             onBulkAction={handleBulkAction}
           />
+          )}
         </CardContent>
       </Card>
 

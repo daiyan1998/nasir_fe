@@ -14,7 +14,8 @@ import {
   User,
   Sun,
   Moon,
-  LogOut
+  LogOut,
+  Tag
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -26,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from 'next-themes'
+import { useLogout } from '@/hooks/mutations/useAuthMutation'
 
 const menuItems = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -34,15 +36,17 @@ const menuItems = [
   { title: 'Attributes', href: '/admin/attributes', icon: FolderTree },
   { title: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { title: 'Users', href: '/admin/users', icon: Users },
-  { title: 'Reviews', href: '/admin/reviews', icon: Star },
-  { title: 'Banners', href: '/admin/banners', icon: Image },
-  { title: 'Settings', href: '/admin/settings', icon: Settings },
+  { title: 'Tags', href: '/admin/tags', icon: Tag },
+  // { title: 'Reviews', href: '/admin/reviews', icon: Star },
+  // { title: 'Banners', href: '/admin/banners', icon: Image },
+  // { title: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   const { theme, setTheme } = useTheme()
+  const {mutate: logout} = useLogout()
 
   const isActive = (href: string) => {
     if (href === '/admin') {
@@ -119,12 +123,12 @@ export function AdminLayout() {
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
+            {/* <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-4 w-4" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs">
                 3
               </Badge>
-            </Button>
+            </Button> */}
 
             {/* User menu */}
             <DropdownMenu>
@@ -137,7 +141,7 @@ export function AdminLayout() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem>
+                {/* <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
@@ -145,8 +149,8 @@ export function AdminLayout() {
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuSeparator /> */}
+                <DropdownMenuItem onClick={() => logout()} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>

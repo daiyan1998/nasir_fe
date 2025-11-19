@@ -5,10 +5,11 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Attribute, CategoryAttribute } from '@/lib/mockData'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import { GripVertical, Plus, X } from 'lucide-react'
 import { useGetCategories} from '@/hooks/queries/useCategoryQuery'
+import { Attribute } from '@/types/Attribute.type'
+import { CategoryAttribute } from '@/types/Category.type'
 
 interface CategoryAttributeAssignmentProps {
   attributes: Attribute[]
@@ -26,15 +27,16 @@ export function CategoryAttributeAssignment({
   const [assignments, setAssignments] = useState<CategoryAttribute[]>(categoryAttributes)
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   // hooks
-  const {data: categories = []} = useGetCategories()
+  const {data: categoriesData} = useGetCategories()
+  const categories = categoriesData?.data
 
 
   // Flatten categories for easier access
-  const flatCategories = categories.flatMap(cat => 
+  const flatCategories = categories?.flatMap(cat => 
     cat.children && cat.children.length > 0? cat.children.map(child => ({ ...child, parentName: cat.name })) : [{ ...cat, parentName: undefined }]
   )
   useEffect(() => {
-    if (flatCategories.length > 0 && !selectedCategory) {
+    if (flatCategories?.length > 0 && !selectedCategory) {
       setSelectedCategory(flatCategories[0].id)
     }
   }, [flatCategories, selectedCategory])
@@ -42,7 +44,7 @@ export function CategoryAttributeAssignment({
   const getCategoryAssignments = (categoryId: string) => {
     return assignments
       .filter(ca => ca.categoryId === categoryId)
-      .sort((a, b) => a.sortOrder - b.sortOrder)
+      // .sort((a, b) => a.sortOrder - b.sortOrder)
   }
 
 
@@ -113,14 +115,14 @@ export function CategoryAttributeAssignment({
     <div className="space-y-6">
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
         <TabsList className="grid w-full grid-cols-4">
-          {flatCategories.slice(0, 4).map((category) => (
+          {flatCategories?.slice(0, 4).map((category) => (
             <TabsTrigger key={category.id} value={category.id} className="text-xs">
               {category.parentName ? `${category.parentName} / ${category.name}` : category.name}
             </TabsTrigger>
           ))}
         </TabsList>
         
-        {flatCategories.map((category) => (
+        {flatCategories?.map((category) => (
           <TabsContent key={category.id} value={category.id} className="space-y-4">
             <div className="flex items-center justify-between">
               <div>

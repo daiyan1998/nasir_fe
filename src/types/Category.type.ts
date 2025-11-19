@@ -26,18 +26,18 @@ export interface Category {
 
 
 export interface CategoryAttribute {
-  id: string;
+  id?: string;
   categoryId: string;
   attributeId: string;
   isRequired: boolean;
-  isFilterable: boolean;
+  isFilterable?: boolean;
   sortOrder: number;
 
   category?: Category;
   attribute?: Attribute;
 
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CategoryFilter {

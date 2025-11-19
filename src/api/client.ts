@@ -1,22 +1,28 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:3000'
+const API_BASE_URL = import.meta.env.VITE_API_URL
+
+let accessToken = null
+export const setAccessToken = (token: string) => {
+  accessToken = token
+}
+
+export const clearAccessToken = () => {
+  accessToken = null
+}
 
 // Create axios instance
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  withCredentials: true
 })
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`
     }
     return config
   },
@@ -28,11 +34,20 @@ apiClient.interceptors.request.use(
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized - redirect to login
-      localStorage.removeItem('authToken')
-      window.location.href = '/login'
+ async (error) => {
+    if (error.response?.status === 401 && !error.config._retry) {
+      error.config._retry = true
+       try {
+        // call refresh endpoint — refresh_token is automatically sent in cookie
+        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+        console.log(data)
+        setAccessToken(data.accessToken)
+        error.config.headers.Authorization = `Bearer ${data.accessToken}`
+        return apiClient(error.config)
+      } catch (refreshError) {
+        clearAccessToken()
+        // optional: redirect to login
+      }
     }
     return Promise.reject(error)
   }

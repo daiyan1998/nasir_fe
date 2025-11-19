@@ -33,25 +33,30 @@ import { ImageUploader } from "./ImageUploader";
 import { RichTextEditor } from "./RichTextEditor";
 import { CategorySelector } from "./CategorySelector";
 import { DynamicAttributeInput } from "./DynamicAttributeInput";
-import {
-  generateSKU,
-  generateSlug,
-} from "@/lib/mockData";
+import { generateSKU, generateSlug } from "@/lib/mockData";
 import { AlertCircle } from "lucide-react";
-import { useGetCategories, useGetCategoryById } from "@/hooks/queries/useCategoryQuery";
-import { Category } from "@/types/Category.type";
+import {
+  useGetCategories,
+  useGetCategoryById,
+} from "@/hooks/queries/useCategoryQuery";
 import { Product } from "@/types/Product.type";
 import { Skeleton } from "../ui/skeleton";
+import { TagSelector } from "./TagSelector";
+import { Tag } from "@/types/Tag.type";
 
 // Create a more flexible schema that allows dynamic attributes
-const createProductSchema = (attributeIds: string[] = [], requiredAttributes: string[] = []) => {
+const createProductSchema = (
+  attributeIds: string[] = [],
+  requiredAttributes: string[] = []
+) => {
   const attributesSchema: Record<string, z.ZodTypeAny> = {};
-  
-  attributeIds.forEach(id => {
+
+  attributeIds.forEach((id) => {
     if (requiredAttributes.includes(id)) {
       attributesSchema[id] = z.any().refine(
         (value) => {
-          if (value === undefined || value === null || value === '') return false;
+          if (value === undefined || value === null || value === "")
+            return false;
           if (Array.isArray(value) && value.length === 0) return false;
           return true;
         },
@@ -66,14 +71,15 @@ const createProductSchema = (attributeIds: string[] = [], requiredAttributes: st
     name: z.string().min(1, "Product name is required"),
     slug: z.string().min(1, "Slug is required"),
     description: z.string().min(1, "Description is required"),
-    shortDescription: z.string().min(1, "Short description is required"),
-    price: z.number().min(0, "Price must be positive"),
-    salePrice: z.number().optional(),
-    sku: z.string().min(1, "SKU is required"),
-    stock: z.number().min(0, "Stock must be positive"),
+    specifications: z.string().optional(),
+    shortDesc: z.string().optional(),
+    price: z.coerce.number().min(0, "Price must be positive"),
+    salePrice: z.coerce.number().optional(),
+    sku: z.string().optional(),
+    stock: z.coerce.number().min(0, "Stock must be positive"),
     categoryId: z.string().min(1, "Category is required"),
-    metaTitle: z.string().min(1, "Meta title is required"),
-    metaDescription: z.string().min(1, "Meta description is required"),
+    metaTitle: z.string().optional(),
+    metaDesc: z.string().optional(),
     isActive: z.boolean(),
     isFeatured: z.boolean(),
     attributes: z.object(attributesSchema).optional(),
@@ -97,13 +103,18 @@ export function EnhancedProductForm({
   onSave,
   onCancel,
 }: EnhancedProductFormProps) {
-  const [images, setImages] = useState<ImageFile[]>([]);
+  const [images, setImages] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [productSchema, setProductSchema] = useState(() => createProductSchema());
-
+  const [selectedTags, setSelectedTags] = useState<any>(product?.tags || [])
+  const [productSchema, setProductSchema] = useState(() =>
+    createProductSchema()
+  );
   // hooks
-  const { data: categories = [] }: { data: Category[] } = useGetCategories();
-  const { data: categoryAttributesData, isLoading : categoryAttributesLoading } = useGetCategoryById(selectedCategoryId);
+  const { data : categoriesData, isLoading : categoriesLoading } = useGetCategories();
+  const categories = categoriesData?.data
+  const { data: categoryAttributesData, isLoading: categoryAttributesLoading } =
+    useGetCategoryById(selectedCategoryId);
+
 
   const form = useForm({
     resolver: zodResolver(productSchema),
@@ -111,14 +122,15 @@ export function EnhancedProductForm({
       name: "",
       slug: "",
       description: "",
-      shortDescription: "",
+      specifications: "",
+      shortDesc: "",
       price: 0,
       salePrice: 0,
       sku: "",
       stock: 0,
       categoryId: "",
       metaTitle: "",
-      metaDescription: "",
+      metaDesc: "",
       isActive: false,
       isFeatured: false,
       attributes: {},
@@ -129,17 +141,20 @@ export function EnhancedProductForm({
   const watchName = form.watch("name");
   const watchCategoryId = form.watch("categoryId");
 
+
   // Update schema when category changes
   useEffect(() => {
     if (categoryAttributesData?.categoryAttributes) {
-      const attributeIds = categoryAttributesData.categoryAttributes.map((ca: any) => ca.id);
+      const attributeIds = categoryAttributesData.categoryAttributes.map(
+        (ca: any) => ca.id
+      );
       const requiredAttributes = categoryAttributesData.categoryAttributes
         .filter((ca: any) => ca.isRequired)
         .map((ca: any) => ca.id);
-      
+
       const newSchema = createProductSchema(attributeIds, requiredAttributes);
       setProductSchema(newSchema);
-      
+
       // Reset the form with new schema
       const currentValues = form.getValues();
       form.reset(currentValues);
@@ -170,34 +185,36 @@ export function EnhancedProductForm({
       form.reset({
         name: product.name,
         slug: product.slug,
-        description: product.description,
-        shortDescription: product.shortDesc,
+        description: product.description || "",
+        specifications: product.specifications || "",
+        shortDesc: product.shortDesc || "",
         price: product.price,
         salePrice: product.salePrice,
         sku: product.sku,
         stock: product.stock,
         categoryId: product.categoryId,
-        metaTitle: product.metaTitle,
-        metaDescription: product.metaDesc,
+        metaTitle: product.metaTitle || "",
+        metaDesc: product.metaDesc || "",
         isActive: product.isActive,
         isFeatured: product.isFeatured,
         attributes: product.attributeValues || {},
       });
       setSelectedCategoryId(product.categoryId);
-      setImages([]);
+      setImages(product.images);
+      setSelectedTags(product.tags || [])
     } else {
       form.reset({
         name: "",
         slug: "",
         description: "",
-        shortDescription: "",
+        shortDesc: "",
         price: 0,
         salePrice: 0,
         sku: generateSKU(),
         stock: 0,
         categoryId: "",
         metaTitle: "",
-        metaDescription: "",
+        metaDesc: "",
         isActive: false,
         isFeatured: false,
         attributes: {},
@@ -208,17 +225,22 @@ export function EnhancedProductForm({
   }, [product, form]);
 
   const onSubmit = (data: any) => {
+    const formdata = new FormData();
+    images.map((image) => formdata.append('images', image.file));
+
     const productData: Partial<Product> = {
       ...data,
       attributeValues: data.attributes || {},
-      createdAt: product?.createdAt || new Date().toISOString(),
+      tags: selectedTags
     };
-    
-    onSave(productData);
+
+    // Object.entries(productData).forEach(([key,value]) => {
+    //   formdata.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+    // })
+    onSave({ ...productData,images });
   };
 
-  const onError = (errors: any) => {
-  };
+  const onError = (errors: any) => {};
 
   return (
     <Form {...form}>
@@ -270,7 +292,7 @@ export function EnhancedProductForm({
 
             <FormField
               control={form.control}
-              name="shortDescription"
+              name="shortDesc"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Short Description *</FormLabel>
@@ -295,9 +317,26 @@ export function EnhancedProductForm({
                   <FormLabel>Full Description *</FormLabel>
                   <FormControl>
                     <RichTextEditor
-                      content={field.value}
+                      content={field.value || product?.description}
                       onChange={field.onChange}
                       placeholder="Enter detailed product description..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+              <FormField
+              control={form.control}
+              name="specifications"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product Specifications</FormLabel>
+                  <FormControl>
+                    <RichTextEditor
+                      content={field.value || product?.specifications}
+                      onChange={field.onChange}
+                      placeholder="Enter product specifications..."
                     />
                   </FormControl>
                   <FormMessage />
@@ -321,13 +360,17 @@ export function EnhancedProductForm({
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
-                  <CategorySelector
-                    categories={categories}
-                    value={field.value}
-                    onChange={field.onChange}
-                    required
-                    error={form.formState.errors.categoryId?.message}
-                  />
+                  {categoryAttributesLoading ? (
+                    <Skeleton className="h-6" />
+                  ) : (
+                    <CategorySelector
+                      categories={categories}
+                      value={field.value}
+                      onChange={field.onChange}
+                      required
+                      error={form.formState.errors.categoryId?.message}
+                    />
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -335,39 +378,60 @@ export function EnhancedProductForm({
           </CardContent>
         </Card>
 
+        {/* Tags */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Tags</CardTitle>
+            <CardDescription>
+              Add tags to help organize and filter products
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TagSelector
+              selectedTagIds={selectedTags}
+              onChange={setSelectedTags}
+            />
+          </CardContent>
+        </Card>
+
         {/* Dynamic Attributes */}
-        {selectedCategoryId && categoryAttributesData?.categoryAttributes?.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Product Attributes
-                {form.formState.errors.attributes && (
-                  <AlertCircle className="h-4 w-4 text-destructive" />
-                )}
-              </CardTitle>
-              <CardDescription>
-                Specific attributes for the selected category. Required fields
-                are marked with *
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categoryAttributesLoading ? <Skeleton className="h-6" /> :
-                categoryAttributesData.categoryAttributes?.map((ca: any) => (
-                  <DynamicAttributeInput
-                    key={ca.id}
-                    attribute={ca.attribute}
-                    control={form.control}
-                    name={`attributes.${ca.id}`}
-                    required={ca.isRequired}
-                    error={form.formState.errors.attributes?.[ca.id]}
-                  />
-                ))
-                }
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {selectedCategoryId &&
+          categoryAttributesData?.categoryAttributes?.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Product Attributes
+                  {form.formState.errors.attributes && (
+                    <AlertCircle className="h-4 w-4 text-destructive" />
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Specific attributes for the selected category. Required fields
+                  are marked with *
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {categoryAttributesLoading ? (
+                    <Skeleton className="h-6" />
+                  ) : (
+                    categoryAttributesData.categoryAttributes?.map(
+                      (ca: any) => (
+                        <DynamicAttributeInput
+                          key={ca.id}
+                          attribute={ca.attribute}
+                          control={form.control}
+                          name={`attributes.${ca.id}`}
+                          required={ca.isRequired}
+                          error={form.formState.errors.attributes?.[ca.id]}
+                        />
+                      )
+                    )
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Pricing & Inventory */}
         <Card>
@@ -482,6 +546,7 @@ export function EnhancedProductForm({
           </CardHeader>
           <CardContent>
             <ImageUploader
+              productId = {product?.id}
               images={images}
               onImagesChange={setImages}
               maxImages={5}
@@ -515,7 +580,7 @@ export function EnhancedProductForm({
 
                   <FormField
                     control={form.control}
-                    name="metaDescription"
+                    name="metaDesc"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Meta Description *</FormLabel>

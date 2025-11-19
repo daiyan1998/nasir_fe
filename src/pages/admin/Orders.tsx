@@ -93,6 +93,7 @@ export default function Orders() {
         <div>
           <div className="font-medium">{order.shippingAddress.fullName}</div>
           <div className="text-sm text-muted-foreground">{order.shippingAddress.phone}</div>
+          <div className="text-sm text-muted-foreground">{order.shippingAddress.email}</div>
         </div>
       )
     },
@@ -105,7 +106,7 @@ export default function Orders() {
       key: 'totalAmount',
       header: 'Total',
       render: (order) => (
-        <div className="font-medium">${order.totalAmount}</div>
+        <div className="font-medium">৳ {order.totalAmount}</div>
       )
     },
     // {
@@ -132,21 +133,22 @@ export default function Orders() {
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
     const matchesSearch = searchQuery === '' || 
       order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
+      order.shippingAddress.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.shippingAddress.email.toLowerCase().includes(searchQuery.toLowerCase())
     
     return matchesStatus && matchesSearch
   })
 
   const handleExportCSV = () => {
+
     const csvData = filteredOrders.map(order => ({
       'Order Number': order.orderNumber,
-      'Customer Name': order.customerName,
-      'Customer Email': order.customerEmail,
-      'Order Date': order.orderDate,
+      'Customer Name': order.shippingAddress.fullName,
+      'Customer Email': order.shippingAddress.email,
+      'Order Date': order.createdAt,
       'Status': order.status,
       'Payment Status': order.paymentStatus,
-      'Total': order.total.toFixed(2),
+      'Total': order.totalAmount,
       'Items Count': order.items.reduce((sum, item) => sum + item.quantity, 0)
     }))
 
@@ -167,13 +169,6 @@ export default function Orders() {
     navigate(`/admin/orders/${order.id}`)
   }
 
-  // Stats calculations
-  const totalRevenue = orders.reduce((sum, order) => 
-    order.paymentStatus === 'paid' ? sum + order.total : sum, 0
-  )
-  const pendingOrders = orders.filter(order => order.status === 'pending').length
-  const completedOrders = orders.filter(order => order.status === 'delivered').length
-  const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0
 
   return (
     <div className="space-y-6">
@@ -205,9 +200,9 @@ export default function Orders() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">৳ {ordersData?.meta?.totalRevenue || 0}</div>
             <p className="text-xs text-muted-foreground">
-              From {orders.filter(o => o.paymentStatus === 'paid').length} paid orders
+              From {orders.filter(o => o.paymentStatus === 'COMPLETED').length} paid orders
             </p>
           </CardContent>
         </Card>
@@ -218,7 +213,7 @@ export default function Orders() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingOrders}</div>
+            <div className="text-2xl font-bold">{ordersData?.meta?.pendingOrders}</div>
             <p className="text-xs text-muted-foreground">
               Need processing
             </p>
@@ -231,7 +226,7 @@ export default function Orders() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedOrders}</div>
+            <div className="text-2xl font-bold">{ordersData?.meta?.completedOrders}</div>
             <p className="text-xs text-muted-foreground">
               Successfully delivered
             </p>
@@ -244,7 +239,7 @@ export default function Orders() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${averageOrderValue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">৳ {ordersData?.meta?.averageOrderValue || 0}</div>
             <p className="text-xs text-muted-foreground">
               Per order
             </p>
@@ -274,12 +269,12 @@ export default function Orders() {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="shipped">Shipped</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="ALL">All Statuses</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                  <SelectItem value="SHIPPED">Shipped</SelectItem>
+                  <SelectItem value="DELIVERED">Delivered</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -453,6 +453,41 @@ export interface Banner {
   order: number
   createdAt: string
 }
+export const mockUser: User = {
+  id: '1',
+  name: 'John Smith',
+  email: 'john.smith@email.com',
+  phone: '+1 (555) 123-4567',
+  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+  role: 'customer',
+  status: 'active',
+  registrationDate: '2024-01-15',
+  lastLogin: '2024-01-25',
+  totalOrders: 3,
+  totalSpent: 2847.84,
+  addresses: [
+    {
+      id: '1',
+      type: 'shipping',
+      isDefault: true,
+      street: '123 Main St, Apt 4B',
+      city: 'New York',
+      state: 'NY',
+      zipCode: '10001',
+      country: 'United States'
+    },
+    {
+      id: '2',
+      type: 'billing',
+      isDefault: false,
+      street: '456 Business Ave, Suite 200',
+      city: 'New York',
+      state: 'NY',
+      zipCode: '10002',
+      country: 'United States'
+    }
+  ]
+}
 
 export const users: User[] = [
   {

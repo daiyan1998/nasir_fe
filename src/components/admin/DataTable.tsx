@@ -67,7 +67,7 @@ export function DataTable<T extends { id: string }>({
   const [currentPage, setCurrentPage] = useState(1)
 
   // Filter and search data
-  const filteredData = data.filter(item => {
+  const filteredData = data?.filter(item => {
     // Search filter
     if (search && searchKey) {
       const searchValue = String(item[searchKey]).toLowerCase()
@@ -87,13 +87,13 @@ export function DataTable<T extends { id: string }>({
   })
 
   // Pagination
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const totalPages = Math.ceil(filteredData?.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage)
+  const paginatedData = filteredData?.slice(startIndex, startIndex + itemsPerPage)
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(new Set(paginatedData.map(item => item.id)))
+      setSelectedItems(new Set(paginatedData?.map(item => item.id)))
     } else {
       setSelectedItems(new Set())
     }
@@ -109,8 +109,17 @@ export function DataTable<T extends { id: string }>({
     setSelectedItems(newSelected)
   }
 
-  const isAllSelected = paginatedData.length > 0 && paginatedData.every(item => selectedItems.has(item.id))
-  const isSomeSelected = paginatedData.some(item => selectedItems.has(item.id))
+  const isAllSelected = paginatedData?.length > 0 && paginatedData.every(item => selectedItems.has(item.id))
+  const isSomeSelected = paginatedData?.some(item => selectedItems.has(item.id))
+ 
+  if(data?.length === 0 || data === undefined) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">No data found</p>
+      </div>
+    )
+  }
+
 
   return (
     <div className="space-y-4">
@@ -130,7 +139,7 @@ export function DataTable<T extends { id: string }>({
 
         {filters && (
           <div className="flex gap-2">
-            {filters.map((filter) => (
+            {filters?.map((filter) => (
               <Select
                 key={String(filter.key)}
                 value={activeFilters[String(filter.key)] || ''}
@@ -143,7 +152,7 @@ export function DataTable<T extends { id: string }>({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All {filter.label}</SelectItem>
-                  {filter.options.map((option) => (
+                  {filter.options?.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -202,7 +211,7 @@ export function DataTable<T extends { id: string }>({
                   className={isSomeSelected && !isAllSelected ? "data-[state=checked]:bg-background" : ""}
                 />
               </TableHead>
-              {columns.map((column) => (
+              {columns?.map((column) => (
                 <TableHead key={String(column.key)}>
                   {column.header}
                 </TableHead>
@@ -210,7 +219,7 @@ export function DataTable<T extends { id: string }>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((item) => (
+            {paginatedData?.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
                   <Checkbox
@@ -218,7 +227,7 @@ export function DataTable<T extends { id: string }>({
                     onCheckedChange={(checked) => handleSelectItem(item.id, checked as boolean)}
                   />
                 </TableCell>
-                {columns.map((column) => (
+                {columns?.map((column) => (
                   <TableCell key={String(column.key)}>
                     {column.key === 'actions' ? (
                       customActions ? (
@@ -264,8 +273,8 @@ export function DataTable<T extends { id: string }>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of{' '}
-            {filteredData.length} results
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData?.length)} of{' '}
+            {filteredData?.length} results
           </div>
           <div className="flex items-center gap-2">
             <Button

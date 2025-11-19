@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -7,13 +7,18 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DataTable, Column } from '@/components/admin/DataTable'
 import { Modal } from '@/components/ui/modal'
-import { users as initialUsers, User } from '@/lib/mockData'
 import { Plus, Users, UserCheck, UserX, Shield } from 'lucide-react'
 import { format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import { User } from '@/types/User.type'
+import { useGetUsers } from '@/hooks/queries/useUserQuery'
+import { AddressType } from '@/types/Address.type'
+import { useUpdateUser } from '@/hooks/mutations/useUserMutation'
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(initialUsers)
+  const {mutate: updateUser} = useUpdateUser()
+  const { data: usersData, isLoading } = useGetUsers()
+  const users = usersData?.data || []
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -21,8 +26,22 @@ export default function UsersPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const { toast } = useToast()
 
-  const getRoleBadge = (role: User['role']) => {
-    return role === 'admin' ? (
+  // Helper functions to calculate derived values
+  const getUserName = (user: User) => `${user?.fullName}`
+  // const getUserInitials = (user: User) => `${user?.firstName[0]}${user?.lastName[0]}`
+  const getTotalOrders = (user: User) => user?.orders?.length || 0
+  const getTotalSpent = (user: User) => {
+    if (!user?.orders || user?.orders.length === 0) return 0
+    return user?.orders.reduce((sum, order) => sum + parseFloat(order.totalAmount || '0'), 0)
+  }
+  const getRegistrationDate = (user: User) => {
+    if (!user?.orders || user?.orders.length === 0) return null
+    const dates = user?.orders.map(o => new Date(o.createdAt)).filter(d => !isNaN(d.getTime()))
+    return dates.length > 0 ? new Date(Math.min(...dates.map(d => d.getTime()))) : null
+  }
+
+  const getRoleBadge = (role: string) => {
+    return role === 'ADMIN' || role === 'ADMIN' ? (
       <Badge variant="default" className="bg-purple-100 text-purple-800 hover:bg-purple-100">
         <Shield className="w-3 h-3 mr-1" />
         Admin
@@ -32,8 +51,8 @@ export default function UsersPage() {
     )
   }
 
-  const getStatusBadge = (status: User['status']) => {
-    return status === 'active' ? (
+  const getStatusBadge = (isActive: boolean) => {
+    return isActive ? (
       <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
         Active
       </Badge>
@@ -44,17 +63,16 @@ export default function UsersPage() {
 
   const columns: Column<User>[] = [
     {
-      key: 'name',
+      key: 'firstName',
       header: 'User',
       render: (user) => (
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            {/* <AvatarFallback>{getUserInitials(user)}</AvatarFallback> */}
           </Avatar>
           <div>
-            <div className="font-medium">{user.name}</div>
-            <div className="text-sm text-muted-foreground">{user.email}</div>
+            <div className="font-medium">{getUserName(user)}</div>
+            <div className="text-sm text-muted-foreground">{user?.email}</div>
           </div>
         </div>
       )
@@ -62,38 +80,45 @@ export default function UsersPage() {
     {
       key: 'role',
       header: 'Role',
-      render: (user) => getRoleBadge(user.role)
+      render: (user) => getRoleBadge(user?.role)
     },
     {
-      key: 'registrationDate',
+      key: 'email',
       header: 'Registration',
-      render: (user) => (
-        <div className="text-sm">
-          {format(new Date(user.registrationDate), 'MMM dd, yyyy')}
-        </div>
-      )
+      render: (user) => {
+        const regDate = getRegistrationDate(user)
+        return (
+          <div className="text-sm">
+            {regDate ? format(regDate, 'MMM dd, yyyy') : 'N/A'}
+          </div>
+        )
+      }
     },
     {
-      key: 'totalOrders',
+      key: 'id',
       header: 'Orders',
-      render: (user) => (
-        <div className="text-center">
-          <div className="font-medium">{user.totalOrders}</div>
-          <div className="text-xs text-muted-foreground">${user.totalSpent.toFixed(2)}</div>
-        </div>
-      )
+      render: (user) => {
+        const totalOrders = getTotalOrders(user)
+        const totalSpent = getTotalSpent(user)
+        return (
+          <div className="text-center">
+            <div className="font-medium">{totalOrders}</div>
+            <div className="text-xs text-muted-foreground">৳ {totalSpent.toFixed(2)}</div>
+          </div>
+        )
+      }
     },
     {
-      key: 'status',
+      key: 'lastName',
       header: 'Status',
-      render: (user) => getStatusBadge(user.status)
+      render: (user) => getStatusBadge(user?.isActive)
     },
     {
-      key: 'lastLogin',
-      header: 'Last Login',
+      key: 'phone',
+      header: 'Phone',
       render: (user) => (
         <div className="text-sm">
-          {user.lastLogin ? format(new Date(user.lastLogin), 'MMM dd, yyyy') : 'Never'}
+          {user?.phone || 'N/A'}
         </div>
       )
     },
@@ -103,15 +128,22 @@ export default function UsersPage() {
     }
   ]
 
-  const filteredUsers = users.filter(user => {
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter
-    const matchesSearch = searchQuery === '' || 
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    return matchesRole && matchesStatus && matchesSearch
-  })
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const userName = getUserName(user).toLowerCase()
+      const userRole = user?.role?.toLowerCase() || ''
+      const matchesRole = roleFilter === 'all' || userRole === roleFilter.toLowerCase()
+      const matchesStatus = statusFilter === 'all' || 
+        (statusFilter === 'active' && user.isActive) ||
+        (statusFilter === 'inactive' && !user.isActive)
+      const matchesSearch = searchQuery === '' || 
+        userName.includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.phone?.toLowerCase().includes(searchQuery.toLowerCase())
+      
+      return matchesRole && matchesStatus && matchesSearch
+    })
+  }, [users, roleFilter, statusFilter, searchQuery])
 
   const handleViewDetails = (user: User) => {
     setSelectedUser(user)
@@ -119,34 +151,36 @@ export default function UsersPage() {
   }
 
   const handleToggleStatus = (user: User) => {
-    setUsers(prev => prev.map(u => 
-      u.id === user.id 
-        ? { ...u, status: u.status === 'active' ? 'inactive' : 'active' }
-        : u
-    ))
-    toast({
-      title: "User status updated",
-      description: `${user.name} has been ${user.status === 'active' ? 'deactivated' : 'activated'}.`
-    })
+    const data = {
+      isActive: !user.isActive
+    }
+    if(confirm(`Are you sure you want to ${user.isActive ? 'deactivate' : 'activate'} ${getUserName(user)}?`))
+    updateUser({userId: user.id, profileData: data})
   }
 
   const handleToggleRole = (user: User) => {
-    setUsers(prev => prev.map(u => 
-      u.id === user.id 
-        ? { ...u, role: u.role === 'admin' ? 'customer' : 'admin' }
-        : u
-    ))
-    toast({
-      title: "User role updated",
-      description: `${user.name} is now ${user.role === 'admin' ? 'a customer' : 'an admin'}.`
-    })
+   const data = {
+      role: user.role === 'ADMIN' ? 'CUSTOMER' : 'ADMIN'
+    }
+    if(confirm(`Are you sure you want to ${user.role === 'admin' ? 'demote' : 'promote'} ${getUserName(user)}?`))
+    updateUser({userId: user.id, profileData: data})
   }
 
   // Stats calculations
   const totalUsers = users.length
-  const activeUsers = users.filter(user => user.status === 'active').length
-  const adminUsers = users.filter(user => user.role === 'admin').length
-  const totalRevenue = users.reduce((sum, user) => sum + user.totalSpent, 0)
+  const activeUsers = users.filter(user => user.isActive).length
+  const adminUsers = users.filter(user => user.role?.toLowerCase() === 'admin').length
+  const totalRevenue = users.reduce((sum, user) => sum + getTotalSpent(user), 0)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading users...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -211,7 +245,11 @@ export default function UsersPage() {
             <UserX className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${(totalRevenue / (totalUsers - adminUsers)).toFixed(2)}</div>
+            <div className="text-2xl font-bold">
+              ${totalUsers - adminUsers > 0 
+                ? (totalRevenue / (totalUsers - adminUsers)).toFixed(2) 
+                : '0.00'}
+            </div>
             <p className="text-xs text-muted-foreground">
               Average per customer
             </p>
@@ -263,7 +301,7 @@ export default function UsersPage() {
           <DataTable
             data={filteredUsers}
             columns={columns}
-            searchKey="name"
+            searchKey="email"
             onEdit={handleViewDetails}
             customActions={(user) => (
               <div className="flex gap-1">
@@ -272,14 +310,14 @@ export default function UsersPage() {
                   size="sm"
                   onClick={() => handleToggleStatus(user)}
                 >
-                  {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                  {user.isActive ? 'Deactivate' : 'Activate'}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleToggleRole(user)}
                 >
-                  Make {user.role === 'admin' ? 'Customer' : 'Admin'}
+                  Make {user.role?.toLowerCase() === 'admin' ? 'Customer' : 'Admin'}
                 </Button>
               </div>
             )}
@@ -293,25 +331,24 @@ export default function UsersPage() {
           isOpen={isDetailsOpen}
           onClose={() => setIsDetailsOpen(false)}
           title="User Details"
-          description={`View detailed information for ${selectedUser.name}`}
+          description={`View detailed information for ${getUserName(selectedUser)}`}
           className="max-w-2xl"
         >
           <div className="space-y-6">
             {/* User Info */}
             <div className="flex items-start gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
-                <AvatarFallback>{selectedUser.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                {/* <AvatarFallback>{getUserInitials(selectedUser)}</AvatarFallback> */}
               </Avatar>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold">{selectedUser.name}</h3>
+                <h3 className="text-lg font-semibold">{getUserName(selectedUser)}</h3>
                 <p className="text-muted-foreground">{selectedUser.email}</p>
                 {selectedUser.phone && (
                   <p className="text-sm text-muted-foreground">{selectedUser.phone}</p>
                 )}
                 <div className="flex gap-2 mt-2">
                   {getRoleBadge(selectedUser.role)}
-                  {getStatusBadge(selectedUser.status)}
+                  {getStatusBadge(selectedUser.isActive)}
                 </div>
               </div>
             </div>
@@ -319,16 +356,18 @@ export default function UsersPage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-3 border rounded-lg">
-                <div className="text-2xl font-bold">{selectedUser.totalOrders}</div>
+                <div className="text-2xl font-bold">{getTotalOrders(selectedUser)}</div>
                 <div className="text-sm text-muted-foreground">Total Orders</div>
               </div>
               <div className="text-center p-3 border rounded-lg">
-                <div className="text-2xl font-bold">${selectedUser.totalSpent.toFixed(2)}</div>
+                <div className="text-2xl font-bold">৳ {getTotalSpent(selectedUser).toFixed(2)}</div>
                 <div className="text-sm text-muted-foreground">Total Spent</div>
               </div>
               <div className="text-center p-3 border rounded-lg">
                 <div className="text-2xl font-bold">
-                  {selectedUser.totalOrders > 0 ? (selectedUser.totalSpent / selectedUser.totalOrders).toFixed(2) : '0.00'}
+                  {getTotalOrders(selectedUser) > 0 
+                    ? (getTotalSpent(selectedUser) / getTotalOrders(selectedUser)).toFixed(2) 
+                    : '0.00'}
                 </div>
                 <div className="text-sm text-muted-foreground">Avg Order Value</div>
               </div>
@@ -340,17 +379,21 @@ export default function UsersPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground">Registration Date:</span>
-                  <div>{format(new Date(selectedUser.registrationDate), 'MMMM dd, yyyy')}</div>
+                  <div>
+                    {getRegistrationDate(selectedUser) 
+                      ? format(getRegistrationDate(selectedUser)!, 'MMMM dd, yyyy') 
+                      : 'N/A'}
+                  </div>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Last Login:</span>
-                  <div>{selectedUser.lastLogin ? format(new Date(selectedUser.lastLogin), 'MMMM dd, yyyy') : 'Never'}</div>
+                  <span className="text-muted-foreground">User ID:</span>
+                  <div className="font-mono text-xs">{selectedUser.id}</div>
                 </div>
               </div>
             </div>
 
             {/* Addresses */}
-            {selectedUser.addresses.length > 0 && (
+            {selectedUser.addresses && selectedUser.addresses.length > 0 && (
               <div className="space-y-3">
                 <h4 className="font-medium">Addresses</h4>
                 <div className="space-y-2">
@@ -361,9 +404,11 @@ export default function UsersPage() {
                         {address.isDefault && <Badge variant="default" className="text-xs">Default</Badge>}
                       </div>
                       <div>
-                        <div>{address.street}</div>
-                        <div>{address.city}, {address.state} {address.zipCode}</div>
-                        <div>{address.country}</div>
+                        <div className="font-medium">{address.fullName}</div>
+                        {address.phone && <div className="text-xs text-muted-foreground">{address.phone}</div>}
+                        <div className="mt-1">{address.address}</div>
+                        <div>{address.city}, {address.state || ''} {address.zipCode}</div>
+                        {address.country && <div>{address.country}</div>}
                       </div>
                     </div>
                   ))}

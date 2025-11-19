@@ -11,38 +11,49 @@ import Footer from "@/components/Footer";
 import { useGetProductById, useGetProducts } from "@/hooks/queries/useProductQuery";
 import ProductAttributes from "@/components/ProductAttributes";
 import { useCartStore } from "@/stores/cartStore";
+import { IMG_URL } from '@/utils/constants';
 
 const Product = () => {
   const { id } = useParams();
   const addItem = useCartStore(state => state.addItem);
+  const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
   
 
   // hooks
-  const { data: productData, isLoading } = useGetProductById(id);
+  const { data, isLoading } = useGetProductById(id);
+
+  const productData = data?.data ?? null
+
+  const price = productData?.price
+  const salePrice = productData?.salePrice ?? 1
+  const discountAmmount = price - salePrice
+  const discountPercentage = ((discountAmmount / price) * 100).toFixed(0)
+
+  
   
   const product = {
     ...productData,
     productId: productData?.id,
     images: productData?.images?.map(img => img.url),
-    price: productData?.salePrice,
-    originalPrice: productData?.price,
+    salePrice: productData?.salePrice,
+    price: productData?.price,
     availability:
       productData?.trackInventory && productData?.stock <= productData?.lowStockThreshold
         ? "Low Stock"
         : "In Stock",
     rating: 4.5, // stub
     reviews: 120, // stub
-    colors: [{ name: "White", color: "#fff" }], // derive from variants/attributeValues
-    sizes: ["Standard"], // derive from variants/attributeValues
     features: [productData?.shortDesc],
+    selectedOptions: selectedOptions
   
   };
+
 
   const [selectedImage, setSelectedImage] = useState(
     productData?.images?.findIndex(img => img.isPrimary) || 0
   );
   const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+  // const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [quantity, setQuantity] = useState(1);
   const handleAddToCart = () => {
     addItem({
@@ -57,16 +68,17 @@ const Product = () => {
       
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <div className="text-sm text-muted-foreground mb-6">
+        {/* <div className="text-sm text-muted-foreground mb-6">
           Home {'>'} Electronics {'>'} Smart Watches {'>'} Apple {'>'} Apple Watch Series 10
-        </div>
+        </div> */}
 
         <div className="grid lg:grid-cols-2 gap-12 mb-12">
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
               <img
-                src={product.images?.[selectedImage] || `${'/placeholder.png'}`}
+                // src={product.images?.[selectedImage] || `${'/placeholder.png'}`}
+                src={`${IMG_URL}${product.images?.[selectedImage]}`}
                 alt={product.name}
                 className="w-full h-full object-contain p-8"
               />
@@ -80,7 +92,7 @@ const Product = () => {
                     selectedImage === index ? "border-[hsl(var(--brand-orange))]" : "border-gray-200"
                   }`}
                 >
-                  <img src={image} alt="" className="w-full h-full object-contain p-2" />
+                  <img src={`${IMG_URL}${image}`} alt="" className="w-full h-full object-contain p-2" />
                 </button>
               ))}
             </div>
@@ -97,19 +109,27 @@ const Product = () => {
                     <Star
                       key={i}
                       className={`h-4 w-4 ${
-                        i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
+                        i < Math.floor(product?.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
                       }`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">({product.reviews} reviews)</span>
+                <span className="text-sm text-muted-foreground">({product?.reviews} reviews)</span>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">{product.price}</span>
-              <span className="text-xl text-muted-foreground line-through">{product.originalPrice}</span>
-              <Badge variant="destructive">Save 33%</Badge>
+              {productData?.salePrice > 1 ? (
+                <>
+              <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">৳ {product?.salePrice}</span>
+              <span className="text-xl text-muted-foreground line-through">৳ {product?.price}</span>
+              <Badge variant="destructive">-{discountPercentage}%</Badge>
+                </>
+              ) :
+               <>
+              <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">৳ {product?.price}</span>
+               </>
+              }
             </div>
 
             <div className="space-y-4">
@@ -121,10 +141,12 @@ const Product = () => {
                 <span className="text-sm font-medium">SKU: </span>
                 <span className="text-muted-foreground">{product.sku}</span>
               </div>
+              <div className="prose tiptap" dangerouslySetInnerHTML={{ __html: product.specifications }}>
+              </div>
             </div>
 
             {/* Color Selection */}
-            <ProductAttributes product={product} />
+            <ProductAttributes product={product} onSelectionChange={(selections) => setSelectedOptions(selections)} />
          
 
          
@@ -182,10 +204,16 @@ const Product = () => {
           </div>
         </div>
 
+        <div>
+          <h3 className="text-base font-medium mb-2">Description</h3>
+          <p className="text-sm leading-relaxed text-muted-foreground prose" dangerouslySetInnerHTML={{ __html: product.description }}>
+          </p>
+        </div>
+
         {/* Recently Viewed */}
-        <div className="mb-12">
+        {/* <div className="mb-12">
           <h2 className="text-xl font-bold mb-6">Recently Viewed</h2>
-          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {relatedProducts.slice(0, 4).map((item) => (
               <Card key={item.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
@@ -195,33 +223,33 @@ const Product = () => {
                 </CardContent>
               </Card>
             ))}
-          </div> */}
-        </div>
+          </div>
+        </div> */}
 
         {/* Product Details Tabs */}
         <Tabs defaultValue="overview" className="mb-12">
-          <TabsList className="grid w-full grid-cols-4">
+          {/* <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="shipping">Shipping</TabsTrigger>
             <TabsTrigger value="more">More</TabsTrigger>
-          </TabsList>
+          </TabsList> */}
           
           <TabsContent value="overview" className="mt-6">
             <div className="grid md:grid-cols-2 gap-8">
-              <div>
+              {/* <div>
                 <h3 className="text-lg font-semibold mb-4">Specifications</h3>
-                {/* <div className="space-y-3">
+                <div className="space-y-3">
                   {specifications.map((spec, index) => (
                     <div key={index} className="flex justify-between py-2 border-b border-gray-100">
                       <span className="font-medium">{spec.label}</span>
                       <span className="text-muted-foreground">{spec.value}</span>
                     </div>
                   ))}
-                </div> */}
-              </div>
+                </div>
+              </div> */}
               
-              <div>
+              {/* <div>
                 <h3 className="text-lg font-semibold mb-4">Key Features</h3>
                 <ul className="space-y-2">
                   {product.features.map((feature, index) => (
@@ -231,11 +259,11 @@ const Product = () => {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </div> */}
             </div>
           </TabsContent>
           
-          <TabsContent value="description" className="mt-6">
+          {/* <TabsContent value="description" className="mt-6">
             <div className="prose max-w-none">
               <h3 className="text-lg font-semibold mb-4">Apple Watch Series 10</h3>
               <p className="mb-4">
@@ -253,9 +281,9 @@ const Product = () => {
                 <li>Water resistant design perfect for swimming and water sports</li>
               </ul>
             </div>
-          </TabsContent>
+          </TabsContent> */}
           
-          <TabsContent value="shipping" className="mt-6">
+          {/* <TabsContent value="shipping" className="mt-6">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Shipping Information</h3>
               <div className="grid md:grid-cols-2 gap-6">
@@ -277,9 +305,9 @@ const Product = () => {
                 </div>
               </div>
             </div>
-          </TabsContent>
+          </TabsContent> */}
           
-          <TabsContent value="more" className="mt-6">
+          {/* <TabsContent value="more" className="mt-6">
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-4">Why Choose Apple Gadgets?</h3>
@@ -295,7 +323,7 @@ const Product = () => {
                 </p>
               </div>
             </div>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
 
         {/* Related Products */}

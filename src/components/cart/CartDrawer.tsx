@@ -19,7 +19,6 @@ export function CartDrawer() {
   }
 
  
-
   const calculateTotal = () => {
     return items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   }
@@ -66,7 +65,7 @@ export function CartDrawer() {
               items.map((item) => (
                 <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
                   <img 
-                    src={item.images[0]} 
+                    src={item.images[0] || '/placeholder.jpg'} 
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded"
                   />
@@ -78,7 +77,7 @@ export function CartDrawer() {
                       ))
                     )} */}
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">${item.price}</span>
+                      <span className="font-medium">৳ {item.price}</span>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
@@ -120,7 +119,7 @@ export function CartDrawer() {
               <div className="space-y-4 py-4">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">Subtotal:</span>
-                  <span className="font-bold">${calculateTotal().toFixed(2)}</span>
+                  <span className="font-bold">৳ {calculateTotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm text-muted-foreground">
                   <span>Shipping:</span>
@@ -129,7 +128,7 @@ export function CartDrawer() {
                 <Separator />
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>৳ {calculateTotal().toFixed(2)}</span>
                 </div>
                 <div className="space-y-2">
                   <Button 
