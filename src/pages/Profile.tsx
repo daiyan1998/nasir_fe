@@ -36,11 +36,16 @@ import {
 import { useUpdateProfilePassword } from "@/hooks/mutations/useProfileMutation";
 import { useLogout } from "@/hooks/mutations/useAuthMutation";
 import { Navigate } from "react-router-dom";
+import { Order } from "@/types/Order.type";
+import { Modal } from "@/components/ui/modal";
+import { IMG_URL } from "@/utils/constants";
 
 const Profile = () => {
   //   const [user, setUser] = useState(mockUser);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
+   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   // Filter orders for current user
   //   const userOrders = orders.filter(order => order.customerEmail === user.email);
@@ -356,7 +361,7 @@ const Profile = () => {
                             </div>
                             <div className="text-right">
                               <div className="text-2xl font-bold text-foreground">
-                                ${order.totalAmount}
+                                ৳ {order.totalAmount}
                               </div>
                               <div className="text-sm text-muted-foreground">
                                 {order.items.length} item(s)
@@ -393,7 +398,10 @@ const Profile = () => {
                               Shipping to: {order.shippingAddress.city},{" "}
                               {order.shippingAddress.state}
                             </div>
-                            <Button variant="outline">View Details</Button>
+                            <Button variant="outline" onClick={() => {
+                                setSelectedOrder(order);
+                                setIsOrderModalOpen(true);
+                              }}>View Details</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -482,6 +490,111 @@ const Profile = () => {
       </main>
 
       <Footer />
+
+      {/* Order Details Modal */}
+      <Modal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        title={selectedOrder ? `Order #${selectedOrder.orderNumber}` : "Order Details"}
+        className="max-w-3xl"
+      >
+        {selectedOrder && (
+          <div className="space-y-6">
+            {/* Order Status and Date */}
+            <div className="flex items-center justify-between">
+              <div>
+                <Badge variant={getStatusColor(selectedOrder.status)} className="mb-2">
+                  {selectedOrder.status}
+                </Badge>
+                <p className="text-sm text-muted-foreground">
+                  Placed on {new Date(selectedOrder.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-foreground">
+                  ৳ {selectedOrder.totalAmount}
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Order Items */}
+            <div>
+              <h3 className="font-semibold text-foreground mb-4">Order Items</h3>
+              <div className="space-y-3">
+                {selectedOrder.items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-4 p-3 bg-muted rounded-lg">
+                    <div className="h-20 w-20 bg-background rounded-md flex items-center justify-center overflow-hidden">
+                      {item.product.images && item.product.images.length > 0 ? (
+                        <img src={`${IMG_URL}${item.product.images[0]}`} alt={item.product.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Package className="h-8 w-8 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-foreground">{item.product.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Quantity: {item.quantity} × ৳ {item.price}
+                      </div>
+                    </div>
+                    <div className="font-semibold text-foreground">
+                      {/* ${item} */}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Shipping Address */}
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Shipping Address</h3>
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="font-medium text-foreground">{selectedOrder.shippingAddress.fullName}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {selectedOrder.shippingAddress.address}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedOrder.shippingAddress.country}
+                </p>
+              </div>
+            </div>
+
+            {/* Payment Information */}
+            {/* <div>
+              <h3 className="font-semibold text-foreground mb-3">Payment Method</h3>
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-foreground capitalize">{selectedOrder.paymentMethod}</p>
+              </div>
+            </div> */}
+
+            {/* Order Summary */}
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Order Summary</h3>
+              <div className="space-y-2 p-4 bg-muted rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="text-foreground">৳ {selectedOrder.totalAmount}</span>
+                </div>
+                {/* <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-foreground">Free</span>
+                </div> */}
+                <Separator />
+                <div className="flex justify-between font-semibold">
+                  <span className="text-foreground">Total</span>
+                  <span className="text-foreground">৳ {selectedOrder.totalAmount}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

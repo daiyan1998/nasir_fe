@@ -119,16 +119,16 @@ const Product = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {productData?.salePrice > 1 ? (
+              {productData?.salePrice > productData?.price ? (
+               <>
+              <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">৳ {product?.price}</span>
+               </>
+              ) :
                 <>
               <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">৳ {product?.salePrice}</span>
               <span className="text-xl text-muted-foreground line-through">৳ {product?.price}</span>
               <Badge variant="destructive">-{discountPercentage}%</Badge>
                 </>
-              ) :
-               <>
-              <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">৳ {product?.price}</span>
-               </>
               }
             </div>
 

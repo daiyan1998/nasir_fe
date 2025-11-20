@@ -26,6 +26,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Tags from "./components/admin/Tags";
+import AuthInitializer from "./components/auth/AuthInitializer";
 
 const queryClient = new QueryClient();
 // This code is only for TypeScript
@@ -43,38 +44,40 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/product/:id" element={<Product />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/track-order" element={<TrackOrder />} />
-              <Route path="/category/:categorySlug" element={<Shop />} />
-              <Route path="*" element={<NotFound />} />
+          <AuthInitializer>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/product/:id" element={<Product />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/track-order" element={<TrackOrder />} />
+                <Route path="/category/:categorySlug" element={<Shop />} />
+                <Route path="*" element={<NotFound />} />
 
-              <Route element={<ProtectedRoute />}>
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="products" element={<Products />} />
-                  <Route path="categories" element={<Categories />} />
-                  <Route path="attributes" element={<Attributes />} />
-                  <Route path="tags" element={<Tags />} />
-                  <Route path="orders" element={<Orders />} />
-                  <Route path="orders/:id" element={<OrderDetails />} />
-                  <Route path="users" element={<Users />} />
-                  <Route path="reviews" element={<Reviews />} />
-                  <Route path="banners" element={<Banners />} />
-                  {/* <Route path="settings" element={<Settings />} /> */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="products" element={<Products />} />
+                    <Route path="categories" element={<Categories />} />
+                    <Route path="attributes" element={<Attributes />} />
+                    <Route path="tags" element={<Tags />} />
+                    <Route path="orders" element={<Orders />} />
+                    <Route path="orders/:id" element={<OrderDetails />} />
+                    <Route path="users" element={<Users />} />
+                    <Route path="reviews" element={<Reviews />} />
+                    <Route path="banners" element={<Banners />} />
+                    {/* <Route path="settings" element={<Settings />} /> */}
+                  </Route>
                 </Route>
-              </Route>
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          </AuthInitializer>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
