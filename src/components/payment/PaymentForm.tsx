@@ -1,5 +1,13 @@
 import { Label } from "@/components/ui/label";
-import { Truck, CreditCard, Wallet, MapPin, Phone, User } from "lucide-react";
+import {
+  Truck,
+  CreditCard,
+  Wallet,
+  MapPin,
+  Phone,
+  User,
+  CloudCog,
+} from "lucide-react";
 import { CartItem as OrderItem } from "@/types/Cart.type";
 import {
   Form,
@@ -27,8 +35,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateOrder } from "@/hooks/mutations/useOrderMutation";
 import { useGetProfile } from "@/hooks/queries/useProfileQuery";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { IMG_URL } from "@/utils/constants";
+import { OrderSuccess } from "./OrderSuccess";
+import { Spinner } from "../ui/spinner";
+import { Link } from "react-router-dom";
+import { Order } from "@/types/Order.type";
 
 interface PaymentMethod {
   id: string;
@@ -52,13 +64,14 @@ const checkoutSchema = z.object({
   email: z.string().email("Invalid email address"),
   address: z.string().min(5, "Street address is required"),
   city: z.string().min(2, "City is required"),
-  // state: z.string().optional(),
   zipCode: z.string().optional(),
   notes: z.string().optional(),
   payment: z.string().min(1, "Select a payment method"),
 });
 
 export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
+  const [orderResponse, setOrderResponse] = useState<Order | null>(null);
+
   const products = items.map((item) => item.id);
   const { data: user } = useGetProfile();
 
@@ -69,7 +82,13 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
   }));
 
   // hooks
-  const { mutate: createOrder, isPending: isCreatingOrder } = useCreateOrder();
+  const {
+    mutateAsync: createOrder,
+    data: createOrderResponse,
+    isPending: isCreatingOrder,
+    isSuccess: isOrderSuccess,
+  } = useCreateOrder();
+  console.log(createOrderResponse);
 
   const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
@@ -121,8 +140,8 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
     // }
   ];
 
-  function handlePlaceOrder(values: z.infer<typeof checkoutSchema>) {
-    createOrder({
+  async function handlePlaceOrder(values: z.infer<typeof checkoutSchema>) {
+    const orderResponse = await createOrder({
       userId: values.userId,
       items: sanitizedItems,
       paymentMethod: values.payment,
@@ -136,6 +155,25 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
         notes: values.notes,
       },
     });
+    if (orderResponse) {
+      setOrderResponse(orderResponse.data);
+    }
+  }
+
+  // Show order success screen after order is placed
+  if (isOrderSuccess) {
+    return <OrderSuccess order={orderResponse} />;
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-muted-foreground">Your cart is empty.</p>
+        <Link to="/shop">
+          <Button>Continue Shopping</Button>
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -152,7 +190,7 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
                 {items.map((item: any) => (
                   <div key={item.id} className="flex items-center gap-3">
                     <img
-                      src={`${IMG_URL}${ item.images?.[0] }` || ""}
+                      src={`${IMG_URL}${item.images?.[0]}` || ""}
                       alt={item.name}
                       className="w-12 h-12 object-cover rounded-md"
                     />
@@ -419,8 +457,14 @@ export function PaymentForm({ items, subtotal, total }: PaymentFormProps) {
               type="submit"
               className="w-full bg-brand-orange hover:bg-brand-orange/90"
             >
-              {isCreatingOrder ? "Placing order..." : `Place Order - ৳ ${total.toFixed(2)}`}
-              
+              {isCreatingOrder ? (
+                <span className="flex items-center gap-2">
+                  {" "}
+                  <Spinner /> Placing order...
+                </span>
+              ) : (
+                `Place Order - ৳ ${total.toFixed(2)}`
+              )}
             </Button>
           </div>
         </div>

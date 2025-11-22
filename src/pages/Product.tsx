@@ -5,52 +5,64 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Star, Heart, ShoppingCart, Plus, Minus, Truck, Shield, RefreshCw } from "lucide-react";
+import {
+  Star,
+  Heart,
+  ShoppingCart,
+  Plus,
+  Minus,
+  Truck,
+  Shield,
+  RefreshCw,
+} from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useGetProductById, useGetProducts } from "@/hooks/queries/useProductQuery";
+import {
+  useGetProductById,
+  useGetProducts,
+} from "@/hooks/queries/useProductQuery";
 import ProductAttributes from "@/components/ProductAttributes";
 import { useCartStore } from "@/stores/cartStore";
-import { IMG_URL } from '@/utils/constants';
+import { IMG_URL } from "@/utils/constants";
+import { toast } from "@/hooks/use-toast";
+import { calculateDiscount } from "@/utils/calculateDiscount";
 
 const Product = () => {
   const { id } = useParams();
-  const addItem = useCartStore(state => state.addItem);
-  const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
-  
+  const addItem = useCartStore((state) => state.addItem);
+  const [selectedOptions, setSelectedOptions] = useState<{
+    [key: string]: string;
+  }>({});
 
   // hooks
   const { data, isLoading } = useGetProductById(id);
 
-  const productData = data?.data ?? null
+  const productData = data?.data ?? null;
 
-  const price = productData?.price
-  const salePrice = productData?.salePrice ?? 1
-  const discountAmmount = price - salePrice
-  const discountPercentage = ((discountAmmount / price) * 100).toFixed(0)
+  const price = productData?.price;
+  const salePrice = productData?.salePrice;
+  const { amount: discountAmount, percentage: discountPercentage } =
+    calculateDiscount(price, salePrice);
 
-  
-  
   const product = {
     ...productData,
     productId: productData?.id,
-    images: productData?.images?.map(img => img.url),
+    images: productData?.images?.map((img) => img.url),
     salePrice: productData?.salePrice,
     price: productData?.price,
     availability:
-      productData?.trackInventory && productData?.stock <= productData?.lowStockThreshold
+      productData?.trackInventory &&
+      productData?.stock <= productData?.lowStockThreshold
         ? "Low Stock"
         : "In Stock",
     rating: 4.5, // stub
     reviews: 120, // stub
     features: [productData?.shortDesc],
-    selectedOptions: selectedOptions
-  
+    selectedOptions: selectedOptions,
   };
 
-
   const [selectedImage, setSelectedImage] = useState(
-    productData?.images?.findIndex(img => img.isPrimary) || 0
+    productData?.images?.findIndex((img) => img.isPrimary) || 0
   );
   const [selectedColor, setSelectedColor] = useState(0);
   // const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
@@ -58,14 +70,18 @@ const Product = () => {
   const handleAddToCart = () => {
     addItem({
       ...product,
-      quantity: quantity
-    })
+      quantity: quantity,
+    });
+    toast({
+      title: "Product added to cart",
+      description: "Product added to cart successfully",
+    });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         {/* <div className="text-sm text-muted-foreground mb-6">
@@ -89,10 +105,16 @@ const Product = () => {
                   key={index}
                   onClick={() => setSelectedImage(index)}
                   className={`w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index ? "border-[hsl(var(--brand-orange))]" : "border-gray-200"
+                    selectedImage === index
+                      ? "border-[hsl(var(--brand-orange))]"
+                      : "border-gray-200"
                   }`}
                 >
-                  <img src={`${IMG_URL}${image}`} alt="" className="w-full h-full object-contain p-2" />
+                  <img
+                    src={`${IMG_URL}${image}`}
+                    alt=""
+                    className="w-full h-full object-contain p-2"
+                  />
                 </button>
               ))}
             </div>
@@ -101,55 +123,70 @@ const Product = () => {
           {/* Product Details */}
           <div className="space-y-6">
             <div>
-              <Badge className="mb-2 bg-[hsl(var(--success))] text-white">New Arrival</Badge>
-              <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
+              <Badge className="mb-2 bg-[hsl(var(--success))] text-white">
+                New Arrival
+              </Badge>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                {product.name}
+              </h1>
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={`h-4 w-4 ${
-                        i < Math.floor(product?.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
+                        i < Math.floor(product?.rating)
+                          ? "text-yellow-400 fill-current"
+                          : "text-gray-300"
                       }`}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">({product?.reviews} reviews)</span>
+                <span className="text-sm text-muted-foreground">
+                  ({product?.reviews} reviews)
+                </span>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              {productData?.salePrice > productData?.price ? (
-               <>
-              <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">৳ {product?.price}</span>
-               </>
-              ) :
+              {salePrice && salePrice < price ? (
                 <>
-              <span className="text-3xl font-bold text-[hsl(var(--brand-orange))]">৳ {product?.salePrice}</span>
-              <span className="text-xl text-muted-foreground line-through">৳ {product?.price}</span>
-              <Badge variant="destructive">-{discountPercentage}%</Badge>
+                  <span className="text-3xl font-bold text-brand-orange">
+                    ৳ {salePrice}
+                  </span>
+                  <span className="text-sm text-muted-foreground line-through">
+                    ৳ {price}
+                  </span>
                 </>
-              }
+              ) : (
+                <span className="text-lg font-bold text-brand-orange">
+                  ৳ {price}
+                </span>
+              )}
             </div>
 
             <div className="space-y-4">
               <div>
                 <span className="text-sm font-medium">Availability: </span>
-                <span className="text-[hsl(var(--success))]">{product.availability}</span>
+                <span className="text-[hsl(var(--success))]">
+                  {product.availability}
+                </span>
               </div>
               <div>
                 <span className="text-sm font-medium">SKU: </span>
                 <span className="text-muted-foreground">{product.sku}</span>
               </div>
-              <div className="prose tiptap" dangerouslySetInnerHTML={{ __html: product.specifications }}>
-              </div>
+              <div
+                className="prose tiptap"
+                dangerouslySetInnerHTML={{ __html: product.specifications }}
+              ></div>
             </div>
 
             {/* Color Selection */}
-            <ProductAttributes product={product} onSelectionChange={(selections) => setSelectedOptions(selections)} />
-         
-
-         
+            <ProductAttributes
+              product={product}
+              onSelectionChange={(selections) => setSelectedOptions(selections)}
+            />
 
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
@@ -165,7 +202,9 @@ const Product = () => {
                   <Input
                     type="number"
                     value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    onChange={(e) =>
+                      setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                    }
                     className="w-16 text-center border-0"
                   />
                   <Button
@@ -176,13 +215,16 @@ const Product = () => {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button onClick={handleAddToCart} className="flex-1 bg-[hsl(var(--brand-orange))] hover:bg-[hsl(var(--brand-orange-light))] text-white">
+                <Button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-[hsl(var(--brand-orange))] hover:bg-[hsl(var(--brand-orange-light))] text-white"
+                >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Add to Cart
                 </Button>
-                <Button variant="outline" size="icon">
+                {/* <Button variant="outline" size="icon">
                   <Heart className="h-4 w-4" />
-                </Button>
+                </Button> */}
               </div>
             </div>
 
@@ -204,10 +246,12 @@ const Product = () => {
           </div>
         </div>
 
-        <div>
-          <h3 className="text-base font-medium mb-2">Description</h3>
-          <p className="text-sm leading-relaxed text-muted-foreground prose" dangerouslySetInnerHTML={{ __html: product.description }}>
-          </p>
+        <div className="">
+          {/* <h3 className="text-base font-medium mb-2">Description</h3> */}
+          <div
+            className="mx-auto text-lg leading-normal text-foreground prose max-w-2xl"
+            dangerouslySetInnerHTML={{ __html: product.description }}
+          ></div>
         </div>
 
         {/* Recently Viewed */}
@@ -234,7 +278,7 @@ const Product = () => {
             <TabsTrigger value="shipping">Shipping</TabsTrigger>
             <TabsTrigger value="more">More</TabsTrigger>
           </TabsList> */}
-          
+
           <TabsContent value="overview" className="mt-6">
             <div className="grid md:grid-cols-2 gap-8">
               {/* <div>
@@ -248,7 +292,7 @@ const Product = () => {
                   ))}
                 </div>
               </div> */}
-              
+
               {/* <div>
                 <h3 className="text-lg font-semibold mb-4">Key Features</h3>
                 <ul className="space-y-2">
@@ -262,7 +306,7 @@ const Product = () => {
               </div> */}
             </div>
           </TabsContent>
-          
+
           {/* <TabsContent value="description" className="mt-6">
             <div className="prose max-w-none">
               <h3 className="text-lg font-semibold mb-4">Apple Watch Series 10</h3>
@@ -282,7 +326,7 @@ const Product = () => {
               </ul>
             </div>
           </TabsContent> */}
-          
+
           {/* <TabsContent value="shipping" className="mt-6">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Shipping Information</h3>
@@ -306,7 +350,7 @@ const Product = () => {
               </div>
             </div>
           </TabsContent> */}
-          
+
           {/* <TabsContent value="more" className="mt-6">
             <div className="space-y-6">
               <div>

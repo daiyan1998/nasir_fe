@@ -27,7 +27,6 @@ export function CategorySelector({ categories, value, onChange, required = false
 
   const flatCategories = flattenCategories(categories)
 
-  console.log(flatCategories(categories).map(c => c.id))
 
   return (
     <div className="space-y-2">

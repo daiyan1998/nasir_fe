@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge'
 import { DataTable, Column } from '@/components/admin/DataTable'
 import { Modal } from '@/components/ui/modal'
 import { EnhancedProductForm } from '@/components/admin/EnhancedProductForm'
-// import { products as initialProducts, categories, Product } from '@/lib/mockData'
 import { Plus, Package } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateProduct, useDeleteProduct, useUpdateProduct } from '@/hooks/mutations/useProductMutation'
@@ -36,7 +35,7 @@ export default function Products() {
 
   const formatPrice = (price: number | string) => {
     const numaricPrice = typeof price === 'string' ? parseFloat(price) : price
-    return `${numaricPrice.toFixed(2)}$`
+    return `৳ ${numaricPrice.toFixed(2)}`
   }
 
   const getStatusBadge = (status: boolean) => {
@@ -117,6 +116,20 @@ export default function Products() {
         </div>
       )
     },
+    {
+      key: 'tags',
+      header: 'Tag',
+      render: (product) => (
+        <>
+        {product.tags.map(t => (
+          <Badge color={t.color}>
+            {t.name}
+          </Badge>
+        ))}
+        </>
+      )
+    }
+    ,
     {
       key: 'actions',
       header: 'Actions'

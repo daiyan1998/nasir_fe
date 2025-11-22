@@ -14,7 +14,7 @@ export const tagService = {
         return data
     },
     updateTag: async (payload) => {
-        const {data} = await apiClient.patch(endpoints.tags, payload)
+        const {data} = await apiClient.patch(endpoints.tagById(payload.id), payload)
         return data
     },
 

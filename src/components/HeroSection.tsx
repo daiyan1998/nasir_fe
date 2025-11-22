@@ -16,7 +16,7 @@ const HeroSection = () => {
       <div className="grid grid-cols-1 gap-6">
         {/* Main hero banner */}
         <div className="lg:col-span-2">
-          <Carousel className="w-full" plugins={[AutoPlay({delay:2000})]}>
+          <Carousel className="w-full" plugins={[AutoPlay({delay:5000})]}>
             <CarouselContent>
               {banners.map((banner, index) => (
                 <CarouselItem key={index}>

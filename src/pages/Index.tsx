@@ -5,23 +5,24 @@ import PromoBanner from "@/components/PromoBanner";
 import Footer from "@/components/Footer";
 import { useGetProducts } from "@/hooks/queries/useProductQuery";
 
-
 const Index = () => {
-  const {data: productsRes} = useGetProducts()
-  const products = productsRes?.data || []
+  const { data: productsRes } = useGetProducts();
+  const products = productsRes?.data || [];
+  const { data: featuredProducts } = useGetProducts({
+    filters: {
+      tags: ["Featured Product"],
+    },
+  });
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <HeroSection />
       {/* <FeaturedCategories /> */}
-      <ProductSection 
-        title="Featured Products" 
-        products={products} 
-      />
+      <ProductSection title="New Products" products={products} />
       <PromoBanner />
-      <ProductSection 
-        title="New Arrival Products" 
-        products={products} 
+      <ProductSection
+        title="Featured Products"
+        products={featuredProducts?.data || []}
       />
       <Footer />
     </div>

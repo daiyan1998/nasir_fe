@@ -6,16 +6,22 @@ import { Switch } from '@/components/ui/switch'
 import { DataTable } from '@/components/admin/DataTable'
 import { Modal } from '@/components/ui/modal'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2, CloudCog } from 'lucide-react'
 import { toast } from 'sonner'
 import { Tag } from '@/types/Tag.type'
 import { generateSlug } from '@/lib/utils'
-import { useCreateTag } from '@/hooks/mutations/useTagMutations'
+import { useCreateTag, useUpdateTag } from '@/hooks/mutations/useTagMutations'
+import { useGetTags } from '@/hooks/queries/useTagQuery'
+import { useDeleteTag } from '@/hooks/mutations/useTagMutations'
 
 export default function Tags() {
   const {mutate: createTag} = useCreateTag()
+  const {mutate: deleteTag} = useDeleteTag()
+  const {mutate: updateTag} = useUpdateTag()
+  const {data: tagsData} = useGetTags()
+  const tags = tagsData?.data
 
-  const [tags, setTags] = useState<Tag[]>()
+  // const [tags, setTags] = useState<Tag[]>()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingTag, setEditingTag] = useState<Tag | null>(null)
   const [formData, setFormData] = useState<Partial<Tag>>({
@@ -55,11 +61,11 @@ export default function Tags() {
         </Badge>
       ),
     },
-    {
-      key: 'createdAt' as keyof Tag,
-      header: 'Created',
-      sortable: true,
-    },
+    // {
+    //   key: 'createdAt' as keyof Tag,
+    //   header: 'Created',
+    //   sortable: true,
+    // },
     {
       key: 'actions' as const,
       header: 'Actions',
@@ -75,7 +81,7 @@ export default function Tags() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => handleDelete(tag.id)}
+            onClick={() => handleDelete(tag)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -95,14 +101,12 @@ export default function Tags() {
     setIsFormOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    setTags(tags.filter((tag) => tag.id !== id))
-    toast.success('Tag deleted successfully')
+  const handleDelete = (item: Tag) => {
+    deleteTag(item.id)
   }
 
   const handleBulkDelete = (items: Tag[]) => {
     const ids = items.map((tag) => tag.id)
-    setTags(tags.filter((tag) => !ids.includes(tag.id)))
     toast.success(`${ids.length} tags deleted successfully`)
   }
 
@@ -115,21 +119,7 @@ export default function Tags() {
     }
 
     if (editingTag) {
-      setTags(
-        tags.map((tag) =>
-          tag.id === editingTag.id
-            ? {
-                ...tag,
-                ...formData,
-                name: formData.name!,
-                slug: formData.slug!,
-                color: formData.color!,
-                active: formData.active!,
-              }
-            : tag
-        )
-      )
-      toast.success('Tag updated successfully')
+      updateTag({id:editingTag.id, ...formData})
     } else {
       const newTag: Omit<Tag, 'id'> = {
         name: formData.name!,
@@ -137,7 +127,6 @@ export default function Tags() {
         color: formData.color!,
         active: formData.active ?? true,
       }
-    //   setTags([...tags, newTag])
       createTag(newTag)
     }
 
@@ -182,6 +171,8 @@ export default function Tags() {
         data={tags}
         columns={columns}
         onBulkDelete={handleBulkDelete}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
       />
 
       <Modal

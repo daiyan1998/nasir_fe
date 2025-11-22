@@ -43,9 +43,9 @@ export function TagSelector({ selectedTagIds, onChange }: TagSelectorProps) {
             aria-expanded={open}
             className="w-full justify-start"
           >
-            {/* {selectedTags.length > 0
+            {selectedTags.length > 0
               ? `${selectedTags.length} tag(s) selected`
-              : 'Select tags...'} */}
+              : 'Select tags...'}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">

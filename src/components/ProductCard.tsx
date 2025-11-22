@@ -6,19 +6,22 @@ import { Link } from "react-router-dom";
 import ProductAttributes from "./ProductAttributes";
 import { Product } from "@/types/Product.type";
 import { IMG_URL } from "@/utils/constants";
+import { calculateDiscount } from "@/utils/calculateDiscount";
 
 const ProductCard = ({ product }: { product: Product }) => {
   if (!product) return null;
   const price = product?.price;
   const salePrice = product?.salePrice;
-  const discountAmmount = price - salePrice;
-  const discountPercentage = Number(((discountAmmount / price) * 100).toFixed(0));
+  const { amount: discountAmount, percentage: discountPercentage } =
+    calculateDiscount(price, salePrice);
+
+  console.log(product.name, discountAmount);
   return (
     <Link key={product.id} to={`/product/${product.id}`}>
       <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300">
         <CardContent className="p-4">
           <div className="relative mb-4">
-            {discountPercentage > 0 && salePrice !== null &&  (
+            {discountAmount > 0 && (
               <Badge className="absolute top-2 right-2 bg-red-500 text-white text-xs z-10">
                 -{discountPercentage}%
               </Badge>
@@ -27,7 +30,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             <div className="aspect-square bg-muted rounded-lg overflow-hidden mb-4 p-4">
               {product.images.length > 0 && (
                 <img
-                  src={`${IMG_URL}${ product.images[0].url }`}
+                  src={`${IMG_URL}${product.images[0].url}`}
                   alt={product.name}
                   className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                 />
@@ -57,21 +60,19 @@ const ProductCard = ({ product }: { product: Product }) => {
             </div>
 
             <div className="flex items-center space-x-2">
-              {product.salePrice !== null && product.salePrice < product.price ? (
+              {salePrice && salePrice < price ? (
                 <>
                   <span className="text-lg font-bold text-brand-orange">
-                    ৳ {product.salePrice}
+                    ৳ {salePrice}
                   </span>
                   <span className="text-sm text-muted-foreground line-through">
-                    ৳ {product.price}
+                    ৳ {price}
                   </span>
                 </>
               ) : (
-                <>
-                  <span className="text-lg font-bold text-brand-orange">
-                    ৳ {product.price}
-                  </span>
-                </>
+                <span className="text-lg font-bold text-brand-orange">
+                  ৳ {price}
+                </span>
               )}
             </div>
             <div className="flex space-x-2 pt-2">

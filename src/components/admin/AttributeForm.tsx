@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-// import { Attribute, AttributeValue } from '@/lib/mockData'
 import { Plus, X, GripVertical } from 'lucide-react'
 import { Attribute, AttributeValue } from '@/types/Attribute.type'
 
