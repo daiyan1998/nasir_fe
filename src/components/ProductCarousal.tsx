@@ -1,5 +1,3 @@
-import * as React from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -16,12 +14,12 @@ interface ProductCarousalProps {
 const ProductCarousal = ({ products }: ProductCarousalProps): JSX.Element => {
   return (
     <Carousel
-    className="mx-auto w-full max-w-7xl p-10">
+    className="mx-auto w-full max-w-7xl md:px-10">
       <CarouselContent className="">
         {products.map((product, index) => (
           <CarouselItem
             key={index}
-            className="md:basis-2/5 lg:basis-1/3"
+            className="basis-1/2 sm:basis-1/2  md:basis-2/5 lg:basis-1/5"
           >
             <div className="p-1">
               <ProductCard product={product} />

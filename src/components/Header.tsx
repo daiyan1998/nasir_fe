@@ -15,6 +15,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useGetCategories } from "@/hooks/queries/useCategoryQuery";
 import { SearchBar } from "./search-bar";
+import { Separator } from "./ui/separator";
+import BottomAppBar from "./bottom-app-bar";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,28 +60,9 @@ const Header = () => {
 
   return (
     <header className="bg-brand-dark text-white sticky top-0 z-50">
-      {/* Top bar */}
-      {/* <div className="border-b border-gray-700">
-        <div className="container mx-auto px-4 py-2">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-4">
-              <span>Free Shipping On Order Over $100</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span>Follow Us:</span>
-              <div className="flex space-x-2">
-                <a href="https://www.facebook.com/FluxFords" target="_blank" className="hover:text-brand-orange transition-colors">Facebook</a>
-                <a href="#" className="hover:text-brand-orange transition-colors">Twitter</a>
-                <a href="#" className="hover:text-brand-orange transition-colors">Instagram</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
       {/* Main header */}
       <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-3 justify-between">
           {/* Logo */}
           <Link to="/">
             <div className="flex gap-2 items-center">
@@ -89,22 +72,7 @@ const Header = () => {
           </Link>
 
           {/* Search bar */}
-          <SearchBar/>
-          {/* <div className="flex-1 max-w-2xl mx-8 hidden md:block">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search products..."
-                className="w-full pl-4 pr-12 py-2 bg-white text-black border-0"
-              />
-              <Button
-                size="sm"
-                className="absolute right-1 top-1 bg-brand-orange hover:bg-brand-orange-light"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-          </div> */}
+          <SearchBar />
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
@@ -129,10 +97,6 @@ const Header = () => {
                 <span className="ml-1">Track Order</span>
               </Button>
             </Link>
-            {/* <Button variant="ghost" size="sm" className="text-white hover:text-brand-orange hover:bg-transparent hidden md:flex">
-              <Heart className="h-5 w-5" />
-              <span className="ml-1">Wishlist</span>
-            </Button> */}
             <CartDrawer />
 
             {/* Mobile menu button */}
@@ -164,6 +128,7 @@ const Header = () => {
                         </div>name*/}
                       </div>
                     ))}
+                    <Separator/>
                   </div>
                 </div>
               </SheetContent>
@@ -192,6 +157,9 @@ const Header = () => {
           </div>
         </div>
       </nav>
+
+      {/* Bottom App Bar */}
+      <BottomAppBar cartCount={0} />
     </header>
   );
 };

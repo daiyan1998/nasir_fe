@@ -1,33 +1,34 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { ShoppingCart, Plus, Minus, X, Trash2 } from 'lucide-react'
-import { useCartStore } from '@/stores/cartStore'
-
+import { useNavigate } from "react-router-dom";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ShoppingCart, Plus, Minus, X, Trash2 } from "lucide-react";
+import { useCartStore } from "@/stores/cartStore";
+import { IMG_URL } from "@/utils/constants";
 
 export function CartDrawer() {
-  const navigate = useNavigate()
-  const items = useCartStore(state => state.items)
-  const removeItem = useCartStore(state => state.removeItem)
-  const incrementQuantity = useCartStore(state => state.incrementQuantity)
-  const decrementQuantity = useCartStore(state => state.decrementQuantity)
+  const navigate = useNavigate();
+  const items = useCartStore((state) => state.items);
+  const removeItem = useCartStore((state) => state.removeItem);
+  const incrementQuantity = useCartStore((state) => state.incrementQuantity);
+  const decrementQuantity = useCartStore((state) => state.decrementQuantity);
 
-  const updateQuantity = (id: string, quantity: number) => {
-  }
-
- 
   const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  }
+    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleCheckout = () => {
-    navigate('/checkout')
-  }
+    navigate("/checkout");
+  };
 
   return (
     <Sheet>
@@ -35,8 +36,8 @@ export function CartDrawer() {
         <Button variant="outline" size="icon" className="relative">
           <ShoppingCart className="h-4 w-4 text-black" />
           {totalItems > 0 && (
-            <Badge 
-              variant="destructive" 
+            <Badge
+              variant="destructive"
               className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
             >
               {totalItems}
@@ -64,13 +65,15 @@ export function CartDrawer() {
             ) : (
               items.map((item) => (
                 <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
-                  <img 
-                    src={item.images[0] || '/placeholder.jpg'} 
+                  <img
+                    src={`${IMG_URL}${item.images[0]}` || "/placeholder.jpg"}
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded"
                   />
                   <div className="flex-1 space-y-1">
-                    <h4 className="font-medium text-sm line-clamp-2">{item.name}</h4>
+                    <h4 className="font-medium text-sm line-clamp-2">
+                      {item.name}
+                    </h4>
                     {/* {item.variants.length > 0 && (
                       item.variants.map((variant: string) => (
                         <p key={variant} className="text-xs text-muted-foreground">{variant}</p>
@@ -87,7 +90,9 @@ export function CartDrawer() {
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center text-sm">{item.quantity}</span>
+                        <span className="w-8 text-center text-sm">
+                          {item.quantity}
+                        </span>
                         <Button
                           variant="outline"
                           size="sm"
@@ -117,10 +122,12 @@ export function CartDrawer() {
             <>
               <Separator />
               <div className="space-y-4 py-4">
-                <div className="flex justify-between items-center">
+                {/* <div className="flex justify-between items-center">
                   <span className="font-medium">Subtotal:</span>
-                  <span className="font-bold">৳ {calculateTotal().toFixed(2)}</span>
-                </div>
+                  <span className="font-bold">
+                    ৳ {calculateTotal().toFixed(2)}
+                  </span>
+                </div> */}
                 <div className="flex justify-between items-center text-sm text-muted-foreground">
                   <span>Shipping:</span>
                   <span>Calculated at checkout</span>
@@ -131,15 +138,12 @@ export function CartDrawer() {
                   <span>৳ {calculateTotal().toFixed(2)}</span>
                 </div>
                 <div className="space-y-2">
-                  <Button 
-                    className="w-full bg-brand-orange hover:bg-brand-orange/90" 
+                  <Button
+                    className="w-full bg-brand-orange hover:bg-brand-orange/90"
                     size="lg"
                     onClick={handleCheckout}
                   >
                     Checkout
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    View Cart
                   </Button>
                 </div>
               </div>
@@ -148,5 +152,5 @@ export function CartDrawer() {
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@plugin "@tailwindcss/typography";
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -37,22 +38,22 @@ All colors MUST be HSL.
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
-    
+
     /* E-commerce Design System */
     --brand-orange: 25 95% 53%;
     --brand-orange-light: 25 95% 63%;
     --brand-dark: 222.2 84% 4.9%;
     --header-bg: 222.2 84% 4.9%;
-    
+
     --success: 142 76% 36%;
     --success-foreground: 355.7 100% 97.3%;
-    
+
     --gradient-hero: linear-gradient(135deg, hsl(25 95% 53%), hsl(25 95% 63%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    
+
     --shadow-product: 0 4px 20px -2px hsl(25 95% 53% / 0.1);
     --shadow-hover: 0 8px 30px -4px hsl(25 95% 53% / 0.2);
-    
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
@@ -118,6 +119,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Roboto", sans-serif;
   }
 }
 
@@ -156,4 +158,3 @@ All colors MUST be HSL.
   outline: 2px solid hsl(var(--accent));
   outline-offset: -1px;
 }
-

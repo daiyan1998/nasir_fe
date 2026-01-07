@@ -15,7 +15,6 @@ const Index = () => {
   });
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <HeroSection />
       {/* <FeaturedCategories /> */}
       <ProductSection title="New Products" products={products} />
@@ -24,7 +23,6 @@ const Index = () => {
         title="Featured Products"
         products={featuredProducts?.data || []}
       />
-      <Footer />
     </div>
   );
 };

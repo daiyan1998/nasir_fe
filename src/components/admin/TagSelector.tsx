@@ -1,38 +1,47 @@
-import { useState } from 'react'
-import { Check, X } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-import { useGetTags } from '@/hooks/queries/useTagQuery'
+import { useState } from "react";
+import { Check, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useGetTags } from "@/hooks/queries/useTagQuery";
 
 interface TagSelectorProps {
-  selectedTagIds: string[]
-  onChange: (tagIds: string[]) => void
+  selectedTagIds: string[];
+  onChange: (tagIds: string[]) => void;
 }
 
 export function TagSelector({ selectedTagIds, onChange }: TagSelectorProps) {
-  const [open, setOpen] = useState(false)
-  const {data : tagsData} = useGetTags()
-  const tags = tagsData?.data
+  const [open, setOpen] = useState(false);
+  const { data: tagsData } = useGetTags();
+  const tags = tagsData?.data;
 
-  const selectedTags = tags?.filter((tag) => selectedTagIds.includes(tag.id))
-  console.log(selectedTagIds)
+  const selectedTags = tags?.filter((tag) => selectedTagIds.includes(tag.id));
 
   const handleToggleTag = (tagId: string) => {
     if (selectedTagIds.includes(tagId)) {
-      onChange(selectedTagIds.filter((id) => id !== tagId))
+      onChange(selectedTagIds.filter((id) => id !== tagId));
     } else {
-      onChange([...selectedTagIds, tagId])
+      onChange([...selectedTagIds, tagId]);
     }
-  }
+  };
 
   const handleRemoveTag = (tagId: string) => {
-    onChange(selectedTagIds.filter((id) => id !== tagId))
-  }
+    onChange(selectedTagIds.filter((id) => id !== tagId));
+  };
 
-  if(!tags) return null
+  if (!tags) return null;
   return (
     <div className="space-y-2">
       <Popover open={open} onOpenChange={setOpen}>
@@ -45,7 +54,7 @@ export function TagSelector({ selectedTagIds, onChange }: TagSelectorProps) {
           >
             {selectedTags.length > 0
               ? `${selectedTags.length} tag(s) selected`
-              : 'Select tags...'}
+              : "Select tags..."}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
@@ -63,15 +72,15 @@ export function TagSelector({ selectedTagIds, onChange }: TagSelectorProps) {
                   >
                     <Check
                       className={cn(
-                        'mr-2 h-4 w-4',
+                        "mr-2 h-4 w-4",
                         selectedTagIds.includes(tag.id)
-                          ? 'opacity-100'
-                          : 'opacity-0'
+                          ? "opacity-100"
+                          : "opacity-0"
                       )}
                     />
                     <div
                       className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: tag.color || '#3b82f6' }}
+                      style={{ backgroundColor: tag.color || "#3b82f6" }}
                     />
                     {tag.name}
                   </CommandItem>
@@ -107,5 +116,5 @@ export function TagSelector({ selectedTagIds, onChange }: TagSelectorProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

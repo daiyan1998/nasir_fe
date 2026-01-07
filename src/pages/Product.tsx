@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,9 @@ import { calculateDiscount } from "@/utils/calculateDiscount";
 
 const Product = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const addItem = useCartStore((state) => state.addItem);
+  const clearCart = useCartStore((state) => state.clearCart);
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: string]: string;
   }>({});
@@ -78,10 +80,17 @@ const Product = () => {
     });
   };
 
+  const handleShopNow = () => {
+    clearCart();
+    addItem({
+      ...product,
+      quantity: quantity,
+    });
+    navigate("/checkout");
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         {/* <div className="text-sm text-muted-foreground mb-6">
@@ -123,59 +132,41 @@ const Product = () => {
           {/* Product Details */}
           <div className="space-y-6">
             <div>
-              <Badge className="mb-2 bg-[hsl(var(--success))] text-white">
-                New Arrival
-              </Badge>
               <h1 className="text-3xl font-bold text-foreground mb-2">
                 {product.name}
               </h1>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < Math.floor(product?.rating)
-                          ? "text-yellow-400 fill-current"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  ({product?.reviews} reviews)
-                </span>
-              </div>
             </div>
 
             <div className="flex items-center space-x-4">
               {salePrice && salePrice < price ? (
                 <>
-                  <span className="text-3xl font-bold text-brand-orange">
-                    ৳ {salePrice}
+                  <span className="text-3xl font-bold ">
+                    ৳{salePrice}{" "}
+                    <span className="text-2xl text-gray-400">(Cash Price)</span>
                   </span>
-                  <span className="text-sm text-muted-foreground line-through">
-                    ৳ {price}
+                  <Badge className="text-lg bg-green-100 text-green-500">
+                    {discountPercentage}% OFF
+                  </Badge>
+                  <span className="text-2xl text-muted-foreground line-through">
+                    ৳{price}
                   </span>
                 </>
               ) : (
-                <span className="text-lg font-bold text-brand-orange">
-                  ৳ {price}
+                <span className="text-3xl font-bold ">
+                  ৳{price}{" "}
+                  <span className="text-2xl text-gray-400">(Cash Price)</span>
                 </span>
               )}
-            </div>
-
-            <div className="space-y-4">
+              <div className="w-[1px] h-[15px] bg-gray-300"></div>
               <div>
-                <span className="text-sm font-medium">Availability: </span>
+                <span className="font-bold">Availability: </span>
                 <span className="text-[hsl(var(--success))]">
                   {product.availability}
                 </span>
               </div>
-              <div>
-                <span className="text-sm font-medium">SKU: </span>
-                <span className="text-muted-foreground">{product.sku}</span>
-              </div>
+            </div>
+
+            <div className="space-y-4">
               <div
                 className="prose tiptap"
                 dangerouslySetInnerHTML={{ __html: product.specifications }}
@@ -217,10 +208,18 @@ const Product = () => {
                 </div>
                 <Button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-[hsl(var(--brand-orange))] hover:bg-[hsl(var(--brand-orange-light))] text-white"
+                  className="flex-1 rounded-full"
+                  variant="outline"
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Add to Cart
+                </Button>
+                <Button
+                  onClick={handleShopNow}
+                  variant="outline"
+                  className="flex-1 rounded-full text-white bg-[hsl(var(--brand-orange))] hover:bg-[hsl(var(--brand-orange-light))] hover:text-white"
+                >
+                  Shop Now
                 </Button>
                 {/* <Button variant="outline" size="icon">
                   <Heart className="h-4 w-4" />
@@ -229,7 +228,7 @@ const Product = () => {
             </div>
 
             {/* Features */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t">
+            {/* <div className="grid grid-cols-3 gap-4 pt-6 border-t">
               <div className="text-center">
                 <Truck className="h-6 w-6 mx-auto mb-2 text-[hsl(var(--brand-orange))]" />
                 <p className="text-xs text-muted-foreground">Free Shipping</p>
@@ -242,7 +241,7 @@ const Product = () => {
                 <RefreshCw className="h-6 w-6 mx-auto mb-2 text-[hsl(var(--brand-orange))]" />
                 <p className="text-xs text-muted-foreground">30 Day Returns</p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -389,8 +388,6 @@ const Product = () => {
           </div>
         </div> */}
       </div>
-
-      <Footer />
     </div>
   );
 };

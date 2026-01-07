@@ -4,39 +4,56 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "../use-toast";
 
 export const useCreateAttribute = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (data: any) => attributeService.createAttribute(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.attributes.all });
-        },
-    });
-}
+  return useMutation({
+    mutationFn: (data: any) => attributeService.createAttribute(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.attributes.all });
+    },
+  });
+};
 
 export const useImportAttributes = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (data: any) => attributeService.importAttributes(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.attributes.all });
-        },
-    });
-}
+  return useMutation({
+    mutationFn: (data: any) => attributeService.importAttributes(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.attributes.all });
+    },
+  });
+};
+
+export const useUpdateAttribute = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      attributeService.updateAttribute(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.attributes.all });
+
+      toast({
+        title: "Attribute updated",
+        description: "Attribute has been updated successfully.",
+      });
+    },
+  });
+};
 
 export const useDeleteAttribute = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (id: string) => attributeService.deleteAttribute(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.attributes.all });
+  return useMutation({
+    mutationFn: (id: string) => attributeService.deleteAttribute(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.attributes.all });
 
-            toast({
-                title: "Attribute deleted",
-                description: "Attribute has been deleted successfully.",
-            });
-        },
-    });
-}
+      toast({
+        title: "Attribute deleted",
+        description: "Attribute has been deleted successfully.",
+      });
+    },
+  });
+};

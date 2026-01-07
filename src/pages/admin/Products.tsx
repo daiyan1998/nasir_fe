@@ -181,6 +181,11 @@ export default function Products() {
     setEditingProduct(null)
   }
 
+  const handleProductDuplicate = (product: Product) => {
+    setEditingProduct(product)
+    setIsFormOpen(true)
+  }
+
   const handleCloseForm = () => {
     setIsFormOpen(false)
     setEditingProduct(null)

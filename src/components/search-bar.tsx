@@ -1,39 +1,32 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, Loader2, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { useGetSearchProducts } from '@/hooks/queries/useProductQuery';
-import { IMG_URL } from '@/utils/constants';
-import { useNavigate } from 'react-router-dom';
-
-interface SearchResult {
-  id: string;
-  name: string;
-  images?: {
-    url: string;
-  }[];
-  url?: string;
-}
+import React, { useState, useRef, useEffect } from "react";
+import { Search, Loader2, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { useGetSearchProducts } from "@/hooks/queries/useProductQuery";
+import { IMG_URL } from "@/utils/constants";
+import { useNavigate } from "react-router-dom";
+import ProductCard from "./ProductCard";
+import { Product } from "@/types/Product.type";
 
 interface SearchBarProps {
   placeholder?: string;
-  onSearch?: (query: string) => Promise<SearchResult[]>;
-  onSelect?: (result: SearchResult) => void;
+  onSearch?: (query: string) => Promise<Product[]>;
+  onSelect?: (result: Product) => void;
   debounceMs?: number;
   maxResults?: number;
   className?: string;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
-  placeholder = 'Search products...',
+  placeholder = "Search products...",
   onSearch,
   onSelect,
   debounceMs = 350,
   maxResults = 5,
   className,
 }) => {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<Product[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -41,12 +34,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout>();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // hooks
-  const {data} = useGetSearchProducts(query)
-
-
+  const { data } = useGetSearchProducts(query);
 
   // Debounced search
   useEffect(() => {
@@ -70,7 +61,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         setResults(searchResults);
         setHighlightedIndex(0);
       } catch (error) {
-        console.error('Search failed:', error);
+        console.error("Search failed:", error);
         setResults([]);
       } finally {
         setIsLoading(false);
@@ -87,13 +78,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   // Click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Keyboard navigation
@@ -101,25 +95,25 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     if (!isOpen) return;
 
     switch (e.key) {
-      case 'Escape':
+      case "Escape":
         e.preventDefault();
         setIsOpen(false);
         inputRef.current?.blur();
         break;
 
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
-        setHighlightedIndex(prev => 
+        setHighlightedIndex((prev) =>
           prev < results.length - 1 ? prev + 1 : prev
         );
         break;
 
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
-        setHighlightedIndex(prev => prev > 0 ? prev - 1 : 0);
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
         break;
 
-      case 'Enter':
+      case "Enter":
         e.preventDefault();
         if (results.length > 0 && results[highlightedIndex]) {
           handleSelect(results[highlightedIndex]);
@@ -128,23 +122,23 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
-  const handleSelect = (result: SearchResult) => {
-    navigate(`/product/${result.id}`)
+  const handleSelect = (product: Product) => {
+    navigate(`/product/${product.id}`);
     if (onSelect) {
-      onSelect(result);
+      onSelect(product);
     } else {
       // Default behavior: navigate to result URL or log
-      console.log('Selected:', result);
-      if (result.url) {
-        window.location.href = result.url;
+      console.log("Selected:", product);
+      if (product.id) {
+        navigate(`/product/${product.id}`);
       }
     }
     setIsOpen(false);
-    setQuery('');
+    setQuery("");
   };
 
   const handleClear = () => {
-    setQuery('');
+    setQuery("");
     setResults([]);
     setIsOpen(false);
     inputRef.current?.focus();
@@ -164,8 +158,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   const showDropdown = isOpen && query.trim().length > 0;
 
+  // if(results.length === 0) return null;
+
   return (
-    <div ref={containerRef} className={cn('relative w-full max-w-2xl', className)}>
+    <div
+      ref={containerRef}
+      className={cn("relative w-full max-w-2xl", className)}
+    >
       {/* Search Input */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -204,17 +203,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           id="search-results"
           role="listbox"
           className={cn(
-            'absolute top-full left-0 right-0 mt-2 z-50',
-            'bg-popover border border-border rounded-lg shadow-lg',
-            'animate-in fade-in-0 slide-in-from-top-2 duration-200',
-            'max-h-[400px] overflow-y-auto'
+            "absolute top-full left-0 right-0 mt-2 z-50",
+            "bg-popover border border-border rounded-lg shadow-lg",
+            "animate-in fade-in-0 slide-in-from-top-2 duration-200",
+            "max-h-[400px] overflow-y-auto"
           )}
         >
           {/* Loading State */}
           {isLoading && (
             <div className="flex items-center justify-center py-8 px-4">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">Searching...</span>
+              <span className="ml-2 text-sm text-muted-foreground">
+                Searching...
+              </span>
             </div>
           )}
 
@@ -229,51 +230,46 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
           {/* Results List */}
           {!isLoading && results.length > 0 && (
-            <div className="py-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 px-4 py-2">
               {results.map((result, index) => (
-                <button
+                <ProductCard
                   key={result.id}
-                  id={`search-result-${result.id}`}
-                  role="option"
-                  aria-selected={index === highlightedIndex}
-                  onClick={() => handleSelect(result)}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-4 py-3',
-                    'text-left transition-colors',
-                    'hover:bg-accent',
-                    index === highlightedIndex && 'bg-accent',
-                    'focus:outline-none focus-visible:bg-accent'
-                  )}
-                >
-                  {/* Image */}
-                  {result.images.length > 0 && (
-                    <div className="flex-shrink-0 w-12 h-12 rounded-md overflow-hidden bg-muted">
-                      <img
-                        src={`${IMG_URL}${ result.images[0].url }`}
-                        alt={result.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+                  product={result}
+                />
+                // <button
+                //   key={result.id}
+                //   id={`search-result-${result.id}`}
+                //   role="option"
+                //   aria-selected={index === highlightedIndex}
+                //   onClick={() => handleSelect(result)}
+                //   onMouseEnter={() => setHighlightedIndex(index)}
+                //   className={cn(
+                //     "w-full flex items-center gap-3 px-4 py-3",
+                //     "text-left transition-colors",
+                //     "hover:bg-accent",
+                //     index === highlightedIndex && "bg-accent",
+                //     "focus:outline-none focus-visible:bg-accent"
+                //   )}
+                // >
+                //   {result.images.length > 0 && (
+                //     <div className="flex-shrink-0 w-12 h-12 rounded-md overflow-hidden bg-muted">
+                //       <img
+                //         src={`${IMG_URL}${result.images[0].url}`}
+                //         alt={result.name}
+                //         className="w-full h-full object-cover"
+                //       />
+                //     </div>
+                //   )}
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {result.name}
-                    </p>
-                    {/* {result.description && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {result.description}
-                      </p>
-                    )} */}
-                  </div>
-
-                  {/* Selected Indicator */}
-                  {index === highlightedIndex && (
-                    <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary" />
-                  )}
-                </button>
+                //   <div className="flex-1 min-w-0">
+                //     <p className="text-sm font-medium text-foreground truncate">
+                //       {result.name}
+                //     </p>
+                //     <p className="text-xs text-muted-foreground truncate">
+                //       ৳{result.price}
+                //     </p>
+                //   </div>
+                // </button>
               ))}
             </div>
           )}

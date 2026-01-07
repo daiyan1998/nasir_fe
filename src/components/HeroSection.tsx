@@ -7,25 +7,26 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import AutoPlay from 'embla-carousel-autoplay';
+import AutoPlay from "embla-carousel-autoplay";
 
 const HeroSection = () => {
-  const banners = ['/banner/Web-Banner-4.jpg','/banner/Web-Banner-1.jpg','/banner/Web-Banner-2.jpg']
+  const banners = [
+    "/banner/Web-Banner-4.jpg",
+    "/banner/Web-Banner-1.jpg",
+    "/banner/Web-Banner-2.jpg",
+  ];
   return (
-    <section className="container mx-auto px-4 py-8">
+    <section className="container mx-auto px-2 py-8 overflow-hidden">
       <div className="grid grid-cols-1 gap-6">
         {/* Main hero banner */}
         <div className="lg:col-span-2">
-          <Carousel className="w-full" plugins={[AutoPlay({delay:5000})]}>
+          <Carousel className="w-full" plugins={[AutoPlay({ delay: 5000 })]}>
             <CarouselContent>
               {banners.map((banner, index) => (
                 <CarouselItem key={index}>
                   <div className="p-1">
                     <Card className="relative overflow-hidden bg-gradient-to-r from-blue-50 to-purple-50 border-0 shadow-lg">
-                      <img
-                        src={banner}
-                        className="max-w-full"
-                      />
+                      <img src={banner} className="aspect-[16/7]" />
                     </Card>
                   </div>
                 </CarouselItem>

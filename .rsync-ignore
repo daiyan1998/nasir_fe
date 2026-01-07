@@ -1,0 +1,9 @@
+# Project-specific exclusions
+node_modules/
+.env
+
+# Git-related exclusions
+.git/
+.gitignore
+.gitattributes
+.gitmodules

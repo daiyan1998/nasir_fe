@@ -14,7 +14,7 @@ interface ProductSectionProps {
 
 const ProductSection = ({ title, subtitle, products }: ProductSectionProps) => {
   return (
-    <section className="container mx-auto px-4 py-12">
+    <section className="container mx-auto px-2 py-12 overflow-hidden">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-bold">

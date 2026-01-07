@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,15 @@ import { Product } from "@/types/Product.type";
 import { Skeleton } from "../ui/skeleton";
 import { TagSelector } from "./TagSelector";
 import { Tag } from "@/types/Tag.type";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useGetBrands } from "@/hooks/queries/useBrandQuery";
+import { BrandSelector } from "./brandSelector";
 
 // Create a more flexible schema that allows dynamic attributes
 const createProductSchema = (
@@ -70,6 +79,7 @@ const createProductSchema = (
   return z.object({
     name: z.string().min(1, "Product name is required"),
     slug: z.string().min(1, "Slug is required"),
+    brandId: z.string().min(1, "Brand is required"),
     description: z.string().min(1, "Description is required"),
     specifications: z.string().optional(),
     shortDesc: z.string().optional(),
@@ -83,6 +93,7 @@ const createProductSchema = (
     isActive: z.boolean(),
     isFeatured: z.boolean(),
     attributes: z.object(attributesSchema).optional(),
+    extraAttributes: z.array(z.any()).optional(),
   });
 };
 
@@ -105,22 +116,25 @@ export function EnhancedProductForm({
 }: EnhancedProductFormProps) {
   const [images, setImages] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [selectedTags, setSelectedTags] = useState<any>(product?.tags || [])
+  const [selectedTags, setSelectedTags] = useState<any>(product?.tags || []);
   const [productSchema, setProductSchema] = useState(() =>
     createProductSchema()
   );
   // hooks
-  const { data : categoriesData, isLoading : categoriesLoading } = useGetCategories();
-  const categories = categoriesData?.data
+  const { data: categoriesData, isLoading: categoriesLoading } =
+    useGetCategories();
+  const categories = categoriesData?.data;
   const { data: categoryAttributesData, isLoading: categoryAttributesLoading } =
     useGetCategoryById(selectedCategoryId);
-
+  const { data: brandsData, isLoading: brandsLoading } = useGetBrands();
+  const brands = brandsData?.data;
 
   const form = useForm({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: "",
       slug: "",
+      brandId: "",
       description: "",
       specifications: "",
       shortDesc: "",
@@ -134,13 +148,34 @@ export function EnhancedProductForm({
       isActive: false,
       isFeatured: false,
       attributes: {},
+      extraAttributes: [
+        {
+          name: "",
+          value: "",
+        },
+      ],
     },
     mode: "onChange",
   });
 
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = form;
+  const { fields, append, prepend, remove, swap, move, insert, replace } =
+    useFieldArray({
+      control,
+      name: "extraAttributes",
+      rules: {
+        minLength: 4,
+      },
+    });
+
+  console.log(errors);
+
   const watchName = form.watch("name");
   const watchCategoryId = form.watch("categoryId");
-
 
   // Update schema when category changes
   useEffect(() => {
@@ -201,7 +236,7 @@ export function EnhancedProductForm({
       });
       setSelectedCategoryId(product.categoryId);
       setImages(product.images);
-      setSelectedTags(product.tags || [])
+      setSelectedTags(product.tags || []);
     } else {
       form.reset({
         name: "",
@@ -226,18 +261,18 @@ export function EnhancedProductForm({
 
   const onSubmit = (data: any) => {
     const formdata = new FormData();
-    images.map((image) => formdata.append('images', image.file));
+    images.map((image) => formdata.append("images", image.file));
 
     const productData: Partial<Product> = {
       ...data,
       attributeValues: data.attributes || {},
-      tags: selectedTags
+      tags: selectedTags,
     };
 
     // Object.entries(productData).forEach(([key,value]) => {
     //   formdata.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
     // })
-    onSave({ ...productData,images });
+    onSave({ ...productData, images });
   };
 
   const onError = (errors: any) => {};
@@ -288,6 +323,25 @@ export function EnhancedProductForm({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="brandId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <BrandSelector
+                        brands={brands}
+                        value={field.value}
+                        onChange={field.onChange}
+                        required
+                        error={errors.brandId?.message}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <FormField
@@ -326,7 +380,7 @@ export function EnhancedProductForm({
                 </FormItem>
               )}
             />
-              <FormField
+            <FormField
               control={form.control}
               name="specifications"
               render={({ field }) => (
@@ -375,6 +429,47 @@ export function EnhancedProductForm({
                 </FormItem>
               )}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Extra Fields</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-col gap-2 mb-2">
+              {fields.map((item, index) => {
+                return (
+                  <li key={item.id} className="flex items-center gap-4">
+                    <Input
+                      {...register(`extraAttributes.${index}.name`, {
+                        required: true,
+                      })}
+                      placeholder="name"
+                    />
+
+                    <Controller
+                      render={({ field }) => (
+                        <Input {...field} placeholder="value" />
+                      )}
+                      name={`extraAttributes.${index}.value`}
+                      control={control}
+                    />
+                    <Button type="button" onClick={() => remove(index)}>
+                      Delete
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+            <Button
+              type="button"
+              onClick={() => {
+                append({ name: "", value: "" });
+              }}
+            >
+              append
+            </Button>
           </CardContent>
         </Card>
 
@@ -546,7 +641,7 @@ export function EnhancedProductForm({
           </CardHeader>
           <CardContent>
             <ImageUploader
-              productId = {product?.id}
+              productId={product?.id}
               images={images}
               onImagesChange={setImages}
               maxImages={5}

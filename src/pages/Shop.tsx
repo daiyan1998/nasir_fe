@@ -64,7 +64,7 @@ const Shop = () => {
 
   const handlePriceChange = (value) => {
     setPriceRange(value);
-  }
+  };
 
   const handleFilterChange = (
     attributeName: string,
@@ -85,8 +85,6 @@ const Shop = () => {
   };
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
       {/* Hero Banner */}
       {/* <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
         <div className="container mx-auto px-4">
@@ -172,7 +170,7 @@ const Shop = () => {
                     )}
                     <AccordionContent className="px-2">
                       {categoryFilter.type === "PRICE_RANGE" && (
-                        <PriceRangeSlider setPriceRange = {setPriceRange} />
+                        <PriceRangeSlider setPriceRange={setPriceRange} />
                       )}
                     </AccordionContent>
                   </AccordionItem>
@@ -235,7 +233,7 @@ const Shop = () => {
             <div
               className={`grid gap-6 ${
                 viewMode === "grid"
-                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
                   : "grid-cols-1"
               }`}
             >
@@ -324,8 +322,6 @@ const Shop = () => {
           </Card>
         </div> */}
       </div>
-
-      <Footer />
     </div>
   );
 };

@@ -39,21 +39,22 @@ import { Navigate } from "react-router-dom";
 import { Order } from "@/types/Order.type";
 import { Modal } from "@/components/ui/modal";
 import { IMG_URL } from "@/utils/constants";
+import { ProfileInfo } from "./profile/profile-info";
 
 const Profile = () => {
   //   const [user, setUser] = useState(mockUser);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
-   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   // Filter orders for current user
   //   const userOrders = orders.filter(order => order.customerEmail === user.email);
 
   // hooks
-  const {mutate: updatePassword} = useUpdateProfilePassword()
+  const { mutate: updatePassword } = useUpdateProfilePassword();
   const { data: userData, isLoading: isUserLoading } = useGetProfile();
-  const {mutate: logout} = useLogout()
+  const { mutate: logout } = useLogout();
 
   const user = userData?.data;
   const userOrders = userData?.data?.orders;
@@ -67,7 +68,7 @@ const Profile = () => {
   });
 
   const changePasswordHandler = (data) => {
-    updatePassword(data)
+    updatePassword(data);
   };
 
   const getStatusColor = (status: string) => {
@@ -89,22 +90,22 @@ const Profile = () => {
 
   if (isUserLoading) return <div>Loading...</div>;
 
-  if(!user) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold text-foreground mb-8">
             My Account
           </h1>
 
-          <Button className="mb-4" onClick={() => logout()}>Logout</Button>
+          <Button className="mb-4" onClick={() => logout()}>
+            Logout
+          </Button>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-8">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 Profile
@@ -120,7 +121,10 @@ const Profile = () => {
                 <Package className="h-4 w-4" />
                 Orders
               </TabsTrigger>
-              <TabsTrigger value="change-password" className="flex items-center gap-2">
+              <TabsTrigger
+                value="change-password"
+                className="flex items-center gap-2"
+              >
                 <KeyRound className="h-4 w-4" />
                 Change Password
               </TabsTrigger>
@@ -128,101 +132,7 @@ const Profile = () => {
 
             {/* Profile Tab */}
             <TabsContent value="profile">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Profile Information</CardTitle>
-                      <CardDescription>
-                        Manage your personal details
-                      </CardDescription>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsEditingProfile(!isEditingProfile)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      {isEditingProfile ? "Cancel" : "Edit"}
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName">Full Name</Label>
-                      <Input
-                        id="fullName"
-                        value={user.fullName}
-                        disabled={!isEditingProfile}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={user.email}
-                        disabled={!isEditingProfile}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        value={user.phone || ""}
-                        disabled={!isEditingProfile}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Account Status</Label>
-                      <div>
-                        <Badge
-                          variant={
-                            user.isActive === true ? "default" : "secondary"
-                          }
-                        >
-                          {user.isActive === true ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* <Separator />
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-4 bg-muted rounded-lg">
-                      <div className="text-2xl font-bold text-foreground">{user.totalOrders}</div>
-                      <div className="text-sm text-muted-foreground">Total Orders</div>
-                    </div>
-                    <div className="text-center p-4 bg-muted rounded-lg">
-                      <div className="text-2xl font-bold text-foreground">${user.totalSpent.toFixed(2)}</div>
-                      <div className="text-sm text-muted-foreground">Total Spent</div>
-                    </div>
-                    <div className="text-center p-4 bg-muted rounded-lg">
-                      <div className="text-2xl font-bold text-foreground">{user.addresses.length}</div>
-                      <div className="text-sm text-muted-foreground">Addresses</div>
-                    </div>
-                    <div className="text-center p-4 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">Member Since</div>
-                      <div className="text-sm font-medium text-foreground">{new Date(user.registrationDate).toLocaleDateString()}</div>
-                    </div>
-                  </div> */}
-
-                  {isEditingProfile && (
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditingProfile(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button onClick={() => setIsEditingProfile(false)}>
-                        Save Changes
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  <ProfileInfo />
             </TabsContent>
 
             {/* Addresses Tab */}
@@ -398,10 +308,15 @@ const Profile = () => {
                               Shipping to: {order.shippingAddress.city},{" "}
                               {order.shippingAddress.state}
                             </div>
-                            <Button variant="outline" onClick={() => {
+                            <Button
+                              variant="outline"
+                              onClick={() => {
                                 setSelectedOrder(order);
                                 setIsOrderModalOpen(true);
-                              }}>View Details</Button>
+                              }}
+                            >
+                              View Details
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -489,13 +404,15 @@ const Profile = () => {
         </div>
       </main>
 
-      <Footer />
-
       {/* Order Details Modal */}
       <Modal
         isOpen={isOrderModalOpen}
         onClose={() => setIsOrderModalOpen(false)}
-        title={selectedOrder ? `Order #${selectedOrder.orderNumber}` : "Order Details"}
+        title={
+          selectedOrder
+            ? `Order #${selectedOrder.orderNumber}`
+            : "Order Details"
+        }
         className="max-w-3xl"
       >
         {selectedOrder && (
@@ -503,11 +420,15 @@ const Profile = () => {
             {/* Order Status and Date */}
             <div className="flex items-center justify-between">
               <div>
-                <Badge variant={getStatusColor(selectedOrder.status)} className="mb-2">
+                <Badge
+                  variant={getStatusColor(selectedOrder.status)}
+                  className="mb-2"
+                >
                   {selectedOrder.status}
                 </Badge>
                 <p className="text-sm text-muted-foreground">
-                  Placed on {new Date(selectedOrder.createdAt).toLocaleDateString()}
+                  Placed on{" "}
+                  {new Date(selectedOrder.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <div className="text-right">
@@ -521,19 +442,30 @@ const Profile = () => {
 
             {/* Order Items */}
             <div>
-              <h3 className="font-semibold text-foreground mb-4">Order Items</h3>
+              <h3 className="font-semibold text-foreground mb-4">
+                Order Items
+              </h3>
               <div className="space-y-3">
                 {selectedOrder.items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 p-3 bg-muted rounded-lg">
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 p-3 bg-muted rounded-lg"
+                  >
                     <div className="h-20 w-20 bg-background rounded-md flex items-center justify-center overflow-hidden">
                       {item.product.images && item.product.images.length > 0 ? (
-                        <img src={`${IMG_URL}${item.product.images[0]}`} alt={item.product.name} className="w-full h-full object-cover" />
+                        <img
+                          src={`${IMG_URL}${item.product.images[0]}`}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <Package className="h-8 w-8 text-muted-foreground" />
                       )}
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-foreground">{item.product.name}</div>
+                      <div className="font-medium text-foreground">
+                        {item.product.name}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         Quantity: {item.quantity} × ৳ {item.price}
                       </div>
@@ -550,14 +482,20 @@ const Profile = () => {
 
             {/* Shipping Address */}
             <div>
-              <h3 className="font-semibold text-foreground mb-3">Shipping Address</h3>
+              <h3 className="font-semibold text-foreground mb-3">
+                Shipping Address
+              </h3>
               <div className="p-4 bg-muted rounded-lg">
-                <p className="font-medium text-foreground">{selectedOrder.shippingAddress.fullName}</p>
+                <p className="font-medium text-foreground">
+                  {selectedOrder.shippingAddress.fullName}
+                </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {selectedOrder.shippingAddress.address}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}
+                  {selectedOrder.shippingAddress.city},{" "}
+                  {selectedOrder.shippingAddress.state}{" "}
+                  {selectedOrder.shippingAddress.zipCode}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {selectedOrder.shippingAddress.country}
@@ -575,11 +513,15 @@ const Profile = () => {
 
             {/* Order Summary */}
             <div>
-              <h3 className="font-semibold text-foreground mb-3">Order Summary</h3>
+              <h3 className="font-semibold text-foreground mb-3">
+                Order Summary
+              </h3>
               <div className="space-y-2 p-4 bg-muted rounded-lg">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="text-foreground">৳ {selectedOrder.totalAmount}</span>
+                  <span className="text-foreground">
+                    ৳ {selectedOrder.totalAmount}
+                  </span>
                 </div>
                 {/* <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
@@ -588,7 +530,9 @@ const Profile = () => {
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span className="text-foreground">Total</span>
-                  <span className="text-foreground">৳ {selectedOrder.totalAmount}</span>
+                  <span className="text-foreground">
+                    ৳ {selectedOrder.totalAmount}
+                  </span>
                 </div>
               </div>
             </div>
